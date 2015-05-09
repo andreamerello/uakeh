@@ -20,11 +20,13 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-PREFIX	?= arm-none-eabi
+PREFIX?= arm-none-eabi
 LDSCRIPT=stm32-f103c8.ld
 OPENCM3_DIR := $(realpath libopencm3)
 LIBNAME=opencm3_stm32f1
 STMFAMILY=STM32F1
+FP_FLAGS ?= -msoft-float
+ARCH_FLAGS=-mthumb -mcpu=cortex-m3 $(FP_FLAGS) -mfix-cortex-m3-ldrd
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
