@@ -4,7 +4,7 @@
 (AKA USB Army Knife for the Electronic Hobbyst)
 *************************************************
 
-WARNING: this project is in early development stages, and curently not functional yet.
+WARNING: this project is in early development stage, and curently not functional yet.
 
 This is (the firmware for) a _fully_ open-source USB device for interfacing your
 PC with embedded electronic devices through digital busses.
@@ -12,7 +12,7 @@ PC with embedded electronic devices through digital busses.
 It might resemble the "bus-pirate" device for certain things but:
 - It will _not_ use any third-party proprietary library,
 - It will _not_ need any proprietary/closed-source compilers/IDE. It is compilable with
-  GCC and a Linux box.
+  GCC and a Linux box, and it can be flashed with OpenOCD and an homebrew JTAG interface
 - It uses cheap, but quite powerful, ST Cortex-M3 ARM MCU.
 - It has *a lot* of in/out pins and it will be probably capable of working on more than
   one bus (same or different type) at the same time.
