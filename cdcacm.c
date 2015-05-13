@@ -162,7 +162,7 @@ static const struct usb_config_descriptor config = {
 
 static const char *usb_strings[] = {
 	"DIY",
-	"USB-control",
+	"UAKEH",
 	"gadget",
 };
 

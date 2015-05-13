@@ -1,0 +1,33 @@
+*************************************************
+   UAKEH: USB Army Knife for Electronic Hacks
+
+(AKA USB Army Knife for the Electronic Hobbyst)
+*************************************************
+
+WARNING: this project is in early development stages, and curently not functional yet.
+
+This is (the firmware for) a _fully_ open-source USB device for interfacing your
+PC with embedded electronic devices through digital busses.
+
+It might resemble the "bus-pirate" device for certain things but:
+- It will _not_ use any third-party proprietary library,
+- It will _not_ need any proprietary/closed-source compilers/IDE. It is compilable with
+  GCC and a Linux box.
+- It uses cheap, but quite powerful, ST Cortex-M3 ARM MCU.
+- It has *a lot* of in/out pins and it will be probably capable of working on more than
+  one bus (same or different type) at the same time.
+- Both slave/master role as well as "sniffer" as well as "man-in-the-middle"
+  functionalities will be implemented where possible/applicable.
+- it will have some common features, but it will certainly differs for some other :)
+
+This device has 31 pins that can be configured in several manner including:
+- GPO: up to 31
+- GPI: up to 31
+- CAN: 1
+- I2C: up to 2
+- SPI: up to 2
+- AN:  up to 10
+1 wire protocols might be also implemented.
+Parallel-bus/logic analyzer are possible on GPI/GPO pins.
+Porting on other MCU of the same family, with more pins and more functions should be
+relatively easy :)
