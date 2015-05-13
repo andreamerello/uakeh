@@ -1,7 +1,9 @@
 /*
- * This file is part of the libopencm3 project.
+ * This file is part of USB-Control project.
+ * Copyright (C) 2015 Andrea Merello <andrea.merello@gmail.com>
  *
- * Copyright (C) 2010 Gareth McMullin <gareth@blacksphere.co.nz>
+ *   Mostly based on libopencm3 project examples
+ *   Copyright (C) 2010 Gareth McMullin <gareth@blacksphere.co.nz>
  *
  * This library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,11 +20,12 @@
  */
 
 #include <stdlib.h>
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/gpio.h>
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/cdc.h>
+#include "cdcacm.h"
 
+static void (*cdcacm_client_rx_cb)(char[64], int) = NULL;
+static usbd_device *cdcacm_usbd_dev;
 static const struct usb_device_descriptor dev = {
 	.bLength = USB_DT_DEVICE_SIZE,
 	.bDescriptorType = USB_DT_DEVICE,
@@ -158,9 +161,9 @@ static const struct usb_config_descriptor config = {
 };
 
 static const char *usb_strings[] = {
-	"Black Sphere Technologies",
-	"CDC-ACM Demo",
-	"DEMO",
+	"DIY",
+	"USB-control",
+	"gadget",
 };
 
 /* Buffer to be used for control requests. */
@@ -210,9 +213,8 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 	char buf[64];
 	int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
 
-	if (len) {
-		usbd_ep_write_packet(usbd_dev, 0x82, buf, len);
-		buf[len] = 0;
+	if (len && cdcacm_client_rx_cb) {
+		cdcacm_client_rx_cb(buf, len);
 	}
 }
 
@@ -232,27 +234,26 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 				cdcacm_control_request);
 }
 
-int main(void)
+usbd_device *cdcacm_init(void)
 {
-	int i;
+	cdcacm_usbd_dev = usbd_init(&stm32f103_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
+	usbd_register_set_config_callback(cdcacm_usbd_dev, cdcacm_set_config);
 
-	usbd_device *usbd_dev;
+	return cdcacm_usbd_dev;
+}
 
-	rcc_clock_setup_in_hsi_out_48mhz();
+void cdcacm_register_rx_cb(void (*cb)(char[64], int))
+{
+	cdcacm_client_rx_cb = cb;
+}
 
-	rcc_periph_clock_enable(RCC_GPIOC);
+void cdcacm_tx(char *buf, int len)
+{
+	int wlen;
 
-	gpio_set(GPIOC, GPIO11);
-	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ,
-		      GPIO_CNF_OUTPUT_PUSHPULL, GPIO11);
-
-	usbd_dev = usbd_init(&stm32f103_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
-	usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
-
-	for (i = 0; i < 0x800000; i++)
-		__asm__("nop");
-	gpio_clear(GPIOC, GPIO11);
-
-	while (1)
-		usbd_poll(usbd_dev);
+	while (len) {
+		wlen = (len < 64) ? len : 64;
+		len -=  wlen;
+		usbd_ep_write_packet(cdcacm_usbd_dev, 0x82, buf, wlen);
+	}
 }

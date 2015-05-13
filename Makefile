@@ -81,7 +81,7 @@ LDLIBS		+= -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 .SECONDEXPANSION:
 .SECONDARY:
 
-OBJS=cdcacm.o
+OBJS=cdcacm.o main.o
 
 all: lib usbcontrol.elf
 
