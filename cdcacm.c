@@ -1,5 +1,5 @@
 /*
- * This file is part of USB-Control project.
+ * This file is part of UAKEH (Usb Army Knife for Electronic Hacks) project.
  * Copyright (C) 2015 Andrea Merello <andrea.merello@gmail.com>
  *
  *   Mostly based on libopencm3 project examples
