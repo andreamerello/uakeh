@@ -53,7 +53,7 @@ SCRIPT_DIR      = $(OPENCM3_DIR)/scripts
 
 CFLAGS		+= -Os -g -I$(INCLUDE_DIR) -D$(STMFAMILY)
 CFLAGS		+= -Wextra -Wshadow -Wimplicit-function-declaration
-CFLAGS		+= -Wredundant-decls -Wmissing-prototypes -Wstrict-prototypes
+CFLAGS		+= -Wredundant-decls -Wstrict-prototypes
 CFLAGS		+= -fno-common -ffunction-sections -fdata-sections
 
 ###############################################################################
