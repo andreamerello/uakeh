@@ -1,4 +1,4 @@
-## Makefile for USB-control
+## Makefile for UAKEH
 ## Copyright (C) 2015 Andrea Merello
 ##
 ##   This file is based on the Makefiles in the libopencm3-examples project.
@@ -81,7 +81,7 @@ LDLIBS		+= -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 .SECONDEXPANSION:
 .SECONDARY:
 
-OBJS=cdcacm.o main.o
+OBJS=cdcacm.o main.o cmd.o debug_printf.o
 
 all: lib usbcontrol.elf
 
