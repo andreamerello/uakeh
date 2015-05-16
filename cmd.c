@@ -8,6 +8,7 @@
 #define CMD_DEBUG_PARSE
 
 #define CMD_LF 0xa
+#define CMD_CR 0xd
 
 static cmd_set_t *cmd_set = NULL;
 static usbd_device *usb_dev;
@@ -66,10 +67,11 @@ static void cmd_parse(char *data, int len)
 	for (i = 0; i < len; i++) {
 		ch = data[i];
 
-		if (cmd_len == 0 && ch == ' ')
+		if (cmd_len == 0 &&
+			(ch == ' ' || ch == CMD_LF || ch == CMD_CR))
 			continue;
 
-		if (ch == CMD_LF) {
+		if (ch == CMD_LF || ch == CMD_CR) {
 			cmd_buf[cmd_len] = '\0';
 #ifdef CMD_DEBUG_RX2
 			printf("recv len %d, %s\n", cmd_len, cmd_buf);
