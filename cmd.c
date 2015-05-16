@@ -27,7 +27,6 @@ void __cmd_register_set(cmd_set_t *set)
 
 		set_tmp->next = set;
 	}
-	set->next = NULL;
 }
 
 static void cmd_dispatch(char *cmdstr)
