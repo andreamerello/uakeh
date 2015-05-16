@@ -1,5 +1,11 @@
 #include "cmd.h"
 #include "cdcacm.h"
+#include <stdio.h>
+
+#define CMD_DEBUG_RX2
+//#define CMD_DEBUG_RX1
+#define CMD_DEBUG_TX
+#define CMD_DEBUG_PARSE
 
 #define CMD_LF 0xa
 
@@ -9,7 +15,9 @@ static usbd_device *usb_dev;
 void __cmd_register_set(cmd_set_t *set)
 {
 	cmd_set_t *set_tmp;
-
+#ifdef DEBUG_CMD_REG
+	printf("registering command set. len %d\n", set->len);
+#endif
 	if (cmd_set == NULL) {
 		cmd_set = set;
 	} else {
@@ -31,7 +39,14 @@ static void cmd_dispatch(char *cmdstr)
 	for (set = cmd_set; set; set = set->next) {
 		for (i = 0; i < set->len; i++) {
 			tmp_cmd = &set->set[i];
+#ifdef CMD_DEBUG_PARSE
+			printf("comparing recv (%s) with cmd #%d (%s)\n",
+				cmdstr, i, tmp_cmd->str);
+#endif
 			if (0 == strncmp(cmdstr, tmp_cmd->str, strlen(cmdstr))) {
+#ifdef CMD_DEBUG_PARSE
+				printf("found! calling handler\n");
+#endif
 				tmp_cmd->handler(cmdstr - strlen(cmdstr));
 				return;
 			}
@@ -46,8 +61,9 @@ static void cmd_parse(char *data, int len)
 	char ch;
 	static char cmd_buf[CMD_MAX];
 	static int cmd_len = 0;
-cdcacm_tx("r",1);
-return;
+#ifdef CMD_DEBUG_RX1
+	printf(".%x\n", data[0]);
+#endif
 	for (i = 0; i < len; i++) {
 		ch = data[i];
 
@@ -56,6 +72,9 @@ return;
 
 		if (ch == CMD_LF) {
 			cmd_buf[cmd_len] = '\0';
+#ifdef CMD_DEBUG_RX2
+			printf("recv len %d, %s\n", cmd_len, cmd_buf);
+#endif
 			cmd_dispatch(cmd_buf);
 			cmd_len = 0;
 		} else {
