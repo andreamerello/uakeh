@@ -84,6 +84,17 @@ LDLIBS		+= -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 OBJS=cdcacm.o main.o cmd.o debug_printf.o
 
 all: lib usbcontrol.elf
+	@printf " -------------------  WARNING!!!  -------------------\n"
+	@printf " ----                                            ----\n"
+	@printf " ---- make sure you have no ModemManager running ----\n"
+	@printf " ---- because it is known it misrecognize our    ----\n"
+	@printf " ---- device as a modem, and it tires to         ----\n"
+	@printf " ---- communicate with it, screwing up things..  ----\n"
+	@printf " ----                                            ----\n"
+	@printf " ---- (this message always show up, we does not  ----\n"
+	@printf " ---- try to detect if you really have any modem ----\n"
+	@printf " ---- manager actually runnin ..)                ----\n"
+	@printf " ----------------------------------------------------\n"
 
 %.elf %.map: $(OBJS) $(LDSCRIPT) $(LIB_DIR)/lib$(LIBNAME).a
 	@printf "  LD      $(*).elf\n"

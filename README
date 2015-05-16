@@ -6,6 +6,12 @@
 
 WARNING: this project is in early development stage, and curently not functional yet.
 
+IMPORTANT NOTE: this device will show up as a USB CDCACM peripheral. This means it
+will communicate as a kind of serial port. Unfortunately Linux modem-manager
+daemon misrecognize it as a modem, it tries to communicate with it, and it cause
+serious problem. You have to disable modem manager or avoid it tries to use
+our device as a modem. Otherwise nothing will work!
+
 This is (the firmware for) a _fully_ open-source USB device for interfacing your
 PC with embedded electronic devices through digital busses.
 
