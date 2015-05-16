@@ -116,7 +116,7 @@ static const struct usb_interface_descriptor comm_iface[] = {{
 	.bNumEndpoints = 1,
 	.bInterfaceClass = USB_CLASS_CDC,
 	.bInterfaceSubClass = USB_CDC_SUBCLASS_ACM,
-	.bInterfaceProtocol = USB_CDC_PROTOCOL_AT,
+	.bInterfaceProtocol = USB_CDC_PROTOCOL_NONE,
 	.iInterface = 0,
 
 	.endpoint = comm_endp,
@@ -236,7 +236,10 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 
 usbd_device *cdcacm_init(void)
 {
-	cdcacm_usbd_dev = usbd_init(&stm32f103_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
+	cdcacm_usbd_dev = usbd_init(&stm32f103_usb_driver, &dev, &config,
+				usb_strings, 3, usbd_control_buffer,
+				sizeof(usbd_control_buffer));
+
 	usbd_register_set_config_callback(cdcacm_usbd_dev, cdcacm_set_config);
 
 	return cdcacm_usbd_dev;
@@ -253,7 +256,7 @@ void cdcacm_tx(char *buf, int len)
 
 	while (len) {
 		wlen = (len < 64) ? len : 64;
-		len -=  wlen;
+		len -= wlen;
 		usbd_ep_write_packet(cdcacm_usbd_dev, 0x82, buf, wlen);
 	}
 }
