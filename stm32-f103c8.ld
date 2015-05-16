@@ -29,3 +29,5 @@ MEMORY
 
 /* Include the common ld script. */
 INCLUDE libopencm3_stm32f1.ld
+PROVIDE(_start_ram = ORIGIN(ram));
+PROVIDE(_end_ram = ORIGIN(ram) + LENGTH(ram));

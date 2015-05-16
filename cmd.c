@@ -1,11 +1,14 @@
 #include "cmd.h"
 #include "cdcacm.h"
+#include "ram.h"
 #include <stdio.h>
+#include <alloca.h>
 
-#define CMD_DEBUG_RX2
+//#define CMD_DEBUG_RX2
 //#define CMD_DEBUG_RX1
-#define CMD_DEBUG_TX
-#define CMD_DEBUG_PARSE
+//#define CMD_DEBUG_TX1
+//#define CMD_DEBUG_TX2
+//#define CMD_DEBUG_PARSE
 
 #define CMD_LF 0xa
 #define CMD_CR 0xd
@@ -91,10 +94,33 @@ static void cmd_parse(char *data, int len)
 void cmd_send(char *buf)
 {
 	int len;
+	char *ram_buf;
 
 	len = strlen(buf);
-	buf[len] = CMD_LF;
-	cdcacm_tx(buf, len);
+
+#ifdef CMD_DEBUG_TX1
+	printf("send %p (%s), len %d\n", buf, buf, len);
+#endif
+	if (IS_RAM(buf)) {
+#ifdef CMD_DEBUG_TX2
+		printf("RAM: send in place\n");
+#endif
+		ram_buf = buf;
+	} else {
+#ifdef CMD_DEBUG_TX2
+		printf("ROM\n");
+#endif
+		ram_buf = alloca(len + 1);
+#ifdef CMD_DEBUG_TX2
+		printf("copy to %x\n", ram_buf);
+#endif
+		memcpy(ram_buf, buf, len);
+	}
+	ram_buf[len] = CMD_LF;
+#ifdef CMD_DEBUG_TX2
+	printf("send to cdc\n");
+#endif
+	cdcacm_tx(ram_buf, len + 1);
 }
 
 void cmd_poll()
