@@ -28,7 +28,8 @@ extern void __cmd_register_set(cmd_set_t *set);
 #define CMD_REGISTER_LIST(x) \
 	__cmd_register_set(&TOSET(x));\
 	TOSET(x).set = x; \
-	TOSET(x).len = sizeof(x) / sizeof(cmd_t);
+	TOSET(x).next = NULL; \
+	TOSET(x).len = sizeof(x) / sizeof(x[0]);
 
 extern void cmd_init(void);
 extern void cmd_poll(void);
