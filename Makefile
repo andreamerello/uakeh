@@ -53,7 +53,7 @@ SCRIPT_DIR      = $(OPENCM3_DIR)/scripts
 
 CFLAGS		+= -Os -g -I$(INCLUDE_DIR) -D$(STMFAMILY)
 CFLAGS		+= -Wextra -Wshadow -Wimplicit-function-declaration
-CFLAGS		+= -Wredundant-decls -Wstrict-prototypes
+CFLAGS		+= -Wredundant-decls
 CFLAGS		+= -fno-common -ffunction-sections -fdata-sections
 
 ###############################################################################
@@ -81,7 +81,7 @@ LDLIBS		+= -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 .SECONDEXPANSION:
 .SECONDARY:
 
-OBJS=cdcacm.o main.o cmd.o debug_printf.o
+OBJS=cdcacm.o main.o cmd.o debug_printf.o gpio.o
 
 all: lib usbcontrol.elf
 	@printf " -------------------  WARNING!!!  -------------------\n"
