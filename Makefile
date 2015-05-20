@@ -81,7 +81,7 @@ LDLIBS		+= -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 .SECONDEXPANSION:
 .SECONDARY:
 
-OBJS=cdcacm.o main.o cmd.o debug_printf.o gpio.o
+OBJS=cdcacm.o main.o cmd.o debug_printf.o tinyprintf.o gpio.o
 
 all: lib usbcontrol.elf
 	@printf " -------------------  WARNING!!!  -------------------\n"

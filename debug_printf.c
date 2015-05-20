@@ -28,6 +28,26 @@
 #include <errno.h>
 #include "debug_printf.h"
 
+int _write(int file, char *ptr, int len)
+{
+	int i;
+
+	if (file == 1) {
+		for (i = 0; i < len; i++)
+			usart_send_blocking(USART1, ptr[i]);
+		return i;
+	}
+
+	errno = EIO;
+	return -1;
+}
+
+void _putc(void *a, char c)
+{
+	a;
+	_write(1, &c, 1);
+}
+
 void debug_init()
 {
 	rcc_periph_clock_enable(RCC_GPIOA);
@@ -47,17 +67,7 @@ void debug_init()
 
 	/* Finally enable the USART. */
 	usart_enable(USART1);
-}
-int _write(int file, char *ptr, int len)
-{
-	int i;
 
-	if (file == 1) {
-		for (i = 0; i < len; i++)
-			usart_send_blocking(USART1, ptr[i]);
-		return i;
-	}
-
-	errno = EIO;
-	return -1;
+	/* for tinyprintf */
+	init_printf(NULL, _putc);
 }

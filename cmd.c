@@ -20,6 +20,7 @@
 #include "cdcacm.h"
 #include "ram.h"
 #include <stdio.h>
+#include "debug_printf.h"
 #include <alloca.h>
 
 //#define CMD_DEBUG_RX2
