@@ -252,11 +252,17 @@ void cdcacm_register_rx_cb(void (*cb)(char[64], int))
 
 void cdcacm_tx(char *buf, int len)
 {
-	int wlen;
+	int wlen, written;
 
 	while (len) {
 		wlen = (len < 64) ? len : 64;
-		len -= wlen;
-		usbd_ep_write_packet(cdcacm_usbd_dev, 0x82, buf, wlen);
+		while (1) {
+			written = usbd_ep_write_packet(cdcacm_usbd_dev,
+						0x82, buf, wlen);
+			if (written)
+				break;
+			usbd_poll(cdcacm_usbd_dev);
+		}
+		len -= written;
 	}
 }
