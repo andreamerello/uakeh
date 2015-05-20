@@ -52,24 +52,65 @@ void __cmd_register_set(cmd_set_t *set)
 	}
 }
 
+static void cmd_trim(char *str)
+{
+	/* the cmd arrives already stripped of leading spaces */
+	int len = strlen(str);
+
+	while (str[0] != '\0') {
+		if ((str[0] == ' ') &&
+			((str[1] == ' ' || str[1] == '\0'))) {
+			memmove(str, str + 1, len);
+			len--;
+		}
+		str++;
+	}
+}
+
 static void cmd_dispatch(char *cmdstr)
 {
 	cmd_set_t *set;
 	cmd_t *tmp_cmd;
+	unsigned int cmdlen;
 	int i;
+
+	cmd_trim(cmdstr);
 
 	for (set = cmd_set; set; set = set->next) {
 		for (i = 0; i < set->len; i++) {
 			tmp_cmd = &set->set[i];
+			cmdlen = strlen(tmp_cmd->str);
+
+			/* if the received string is shorter than the cmd, then
+			 * don't even bother going on.
+			 */
+			if (cmdlen > strlen(cmdstr))
+				continue;
+
+			/* if the reiceved cmd is longer than the cmd, then
+			 * check whether this is due to arguments following,
+			 * otherwise the command is not really matching.
+			 */
+			if ((cmdlen < strlen(cmdstr)) && (cmdstr[cmdlen] != ' '))
+				continue;
 #ifdef CMD_DEBUG_PARSE
 			printf("comparing recv (%s) with cmd #%d (%s)\n",
 				cmdstr, i, tmp_cmd->str);
 #endif
-			if (0 == strncmp(cmdstr, tmp_cmd->str, strlen(cmdstr))) {
+			/* compare only up to the arguments (if any) */
+			if (0 == strncmp(cmdstr, tmp_cmd->str, cmdlen)) {
+				/* if the cmd has further args, then remove the
+				 * (unique, since we did cmd_trim() already)
+				 * space leading the args (otherwise we simply
+				 * have \0 here).
+				 */
+				if (cmdstr[cmdlen] == ' ')
+					cmdlen++;
 #ifdef CMD_DEBUG_PARSE
-				printf("found! calling handler\n");
+				printf("Calling cmd handler with args:\n%s\n",
+					cmdstr + cmdlen);
 #endif
-				tmp_cmd->handler(cmdstr - strlen(cmdstr));
+				tmp_cmd->handler(cmdstr + cmdlen);
 				return;
 			}
 		}
