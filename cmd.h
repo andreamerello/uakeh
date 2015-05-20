@@ -20,7 +20,7 @@
 #define __CMD_H__
 
 #include <string.h>
-#define CMD_MAX 16
+#define CMD_MAX 64
 
 typedef struct {
 	char *str;
