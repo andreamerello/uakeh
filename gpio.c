@@ -130,21 +130,30 @@ int gpio_pins(unsigned int pin, uint16_t *pins)
 	return 0;
 }
 
-void gpio_cmd_set_cfg(char *str)
+int gpio_port_pin(char *str, uint32_t *port, int *pin, int *idx)
 {
 	char s_port[8];
+
+	if (2 == sscanf(str, "%8s %u %n", &s_port, pin, idx))
+		return -1;
+	if (gpio_arg32(arg_port, s_port, port) < 0)
+		return -2;
+	return 0;
+}
+
+void gpio_cmd_set_cfg(char *str)
+{
+
 	char s_drv[4];
 	char s_slope[8];
 	char s_pull[8];
-	unsigned int pin;
+	int pin;
 	uint32_t port;
 	uint16_t pins;
 	uint8_t pull, slope, drv;
 	int idx;
 
-	if (2 == sscanf(str, "%8s %u %n", &s_port, &pin, &idx))
-		goto err;
-	if (gpio_arg32(arg_port, s_port, &port) < 0)
+	if (gpio_port_pin(str, &port, &pin, &idx))
 		goto err;
 	if (gpio_pins(pin, &pins) < 0)
 		goto err;
@@ -154,13 +163,13 @@ void gpio_cmd_set_cfg(char *str)
 	if (1 == sscanf(str, "IN %8s", &s_pull)) {
 		if (gpio_arg(arg_pull, s_pull, &pull))
 			goto err;
-		gpio_set_mode(port, GPIO_MODE_INPUT, pull, pin);
+		gpio_set_mode(port, GPIO_MODE_INPUT, pull, pins);
 	} else if (2 == sscanf(str,"OUT %4s %8s", &s_drv, &s_slope)) {
 		if (gpio_arg(arg_slope, s_slope, &slope) < 0)
 			goto err;
 		if (gpio_arg(arg_drv, s_drv, &drv) < 0)
 			goto err;
-		gpio_set_mode(port, slope, drv, pin);
+		gpio_set_mode(port, slope, drv, pins);
 	} else {
 	}
 
@@ -173,8 +182,30 @@ err:
 
 void gpio_cmd_set(char *str)
 {
-	gpio_set(GPIOC, GPIO11);
-	gpio_clear(GPIOC, GPIO11);
+	int on;
+ 	uint32_t port;
+	uint16_t pins;
+	int pin;
+	int idx;
+
+	if (gpio_port_pin(str, &port, &pin, &idx))
+		goto err;
+	if (gpio_pins(pin, &pins) < 0)
+		goto err;
+
+	str += idx;
+	sscanf(str, "%d", &on);
+
+	if (on)
+		gpio_set(port, pins);
+	else
+		gpio_clear(port, pins);
+
+	return;
+
+err:
+	cmd_send("error: wrong params. Use:");
+	cmd_send(GP_CMD_PREFIX"WR <PORT> <PIN> <1/0>");
 }
 
 void gpio_cmd_get_cfg(char *str)
@@ -183,8 +214,21 @@ void gpio_cmd_get_cfg(char *str)
 
 void gpio_cmd_read(char *str)
 {
-}
+	int on;
+	uint32_t port;
+	int pin;
+	int idx;
 
+	if (gpio_port_pin(str, &port, &pin, &idx)) {
+		cmd_send("error: wrong params. Use:");
+		cmd_send(GP_CMD_PREFIX"RD <PORT> <PIN>");
+		return;
+	}
+
+	on = gpio_port_read(port) & pin;
+
+	cmd_send(on ? "1" : "0");
+}
 
 
 void gpio_init()
