@@ -21,6 +21,7 @@
 #include <libopencm3/stm32/gpio.h>
 #include "debug_printf.h"
 #include "cmd.h"
+#include "gpio.h"
 
 #define FW_VERSION "V 0.1"
 
@@ -65,7 +66,7 @@
 
 void cmd_fwv(char *args);
 void cmd_lic(char *args);
-
+void init_modules(void);
 
 CMD_DECLARE_LIST(main_cmds) = {
 	{ .str = "FWV", .handler = cmd_fwv },
@@ -82,6 +83,11 @@ void cmd_lic(char *args)
 	cmd_send("GPL");
 }
 
+void init_modules()
+{
+	gpio_init();
+}
+
 int main(void)
 {
 	int i;
@@ -93,6 +99,7 @@ int main(void)
 	cmd_init();
 
 	CMD_REGISTER_LIST(main_cmds);
+	init_modules();
 	printf("Init complete..\n");
 	while (1)
 		cmd_poll();
