@@ -101,7 +101,7 @@ static void cmd_parse(char *data, int len)
 			cmd_dispatch(cmd_buf);
 			cmd_len = 0;
 		} else {
-			if (cmd_len == CMD_MAX)
+			if ((cmd_len + 1) == CMD_MAX)
 				continue;
 
 			cmd_buf[cmd_len] = ch;
