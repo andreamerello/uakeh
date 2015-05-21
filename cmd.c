@@ -35,13 +35,13 @@
 static cmd_set_t *cmd_set = NULL;
 static usbd_device *usb_dev;
 
-static void cmd_echo(char *);
-static void cmd_help(char *);
+static cmd_res_t cmd_echo(char *);
+static cmd_res_t cmd_help(char *);
 static int cmd_echo_en = 1;
 
 CMD_DECLARE_LIST(cmd_cmds) = {
-	{ .str = "ECHO", .handler = cmd_echo },
-	{ .str = "HELP", .handler = cmd_help }
+	{ .str = "ECHO", .handler = cmd_echo, .help = "<1/0>" },
+	{ .str = "HELP", .handler = cmd_help, .help = NULL }
 };
 
 void __cmd_register_set(cmd_set_t *set)
@@ -76,11 +76,28 @@ static void cmd_trim(char *str)
 	}
 }
 
+static void cmd_do_help(cmd_t *tmp_cmd)
+{
+	char *help_str;
+
+	cmd_send("Command error");
+	if (tmp_cmd->help) {
+		cmd_send("Usage:");
+		help_str = alloca(strlen(tmp_cmd->help) +
+				strlen(tmp_cmd->str) + 2);
+		strcpy(help_str, tmp_cmd->str);
+		strcat(help_str, " ");
+		strcat(help_str, tmp_cmd->help);
+		cmd_send(help_str);
+	}
+}
+
 static void cmd_dispatch(char *cmdstr)
 {
 	cmd_set_t *set;
 	cmd_t *tmp_cmd;
 	unsigned int cmdlen;
+	int ret;
 	int i;
 
 	cmd_trim(cmdstr);
@@ -119,7 +136,11 @@ static void cmd_dispatch(char *cmdstr)
 				printf("Calling cmd handler with args:\n%s\n",
 					cmdstr + cmdlen);
 #endif
-				tmp_cmd->handler(cmdstr + cmdlen);
+				ret = tmp_cmd->handler(cmdstr + cmdlen);
+				if (ret == CMD_ERR)
+					cmd_do_help(tmp_cmd);
+				else if(ret == CMD_OK)
+					cmd_send("OK!");
 				return;
 			}
 		}
@@ -201,12 +222,15 @@ void cmd_poll()
 	usbd_poll(usb_dev);
 }
 
-void cmd_echo(char *args)
+cmd_res_t cmd_echo(char *args)
 {
-	sscanf(args, "%d", &cmd_echo_en);
+	int ret;
+
+	ret = sscanf(args, "%d", &cmd_echo_en);
+	return (ret == 1) ? CMD_OK : CMD_ERR;
 }
 
-void cmd_help(char *args)
+cmd_res_t cmd_help(char *args)
 {
 	cmd_set_t *set;
 	int i;
@@ -217,7 +241,7 @@ void cmd_help(char *args)
 			cmd_send(set->set[i].str);
 		}
 	}
-
+	return CMD_SILENT;
 }
 
 void cmd_init()

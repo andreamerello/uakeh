@@ -24,10 +24,10 @@
 
 #define GP_CMD_PREFIX "GP "
 
-void gpio_cmd_set_cfg(char *);
-void gpio_cmd_get_cfg(char *);
-void gpio_cmd_read(char *);
-void gpio_cmd_set(char *);
+cmd_res_t gpio_cmd_set_cfg(char *);
+cmd_res_t gpio_cmd_get_cfg(char *);
+cmd_res_t gpio_cmd_read(char *);
+cmd_res_t gpio_cmd_set(char *);
 
 typedef struct {
 	char str[8];
@@ -83,10 +83,19 @@ static gpio_arg32_t arg_port[] = {
 
 
 CMD_DECLARE_LIST(gpio_cmds) = {
-	{ .str = GP_CMD_PREFIX"SETCFG", .handler = gpio_cmd_set_cfg },
+	{ .str = GP_CMD_PREFIX"SETCFG",
+	  .handler = gpio_cmd_set_cfg,
+	  .help = "<PORT> <PIN> [IN <PUP/PDN/NONE>]/[OUT <OD/PP> <2MHZ/10MHZ/50MHZ>]"
+	},
 	{ .str = GP_CMD_PREFIX"GETCFG", .handler = gpio_cmd_get_cfg },
-	{ .str = GP_CMD_PREFIX"RD", .handler = gpio_cmd_read },
-	{ .str = GP_CMD_PREFIX"WR", .handler = gpio_cmd_set },
+	{ .str = GP_CMD_PREFIX"RD",
+	  .handler = gpio_cmd_read,
+	  .help = "<PORT> <PIN>"
+	},
+	{ .str = GP_CMD_PREFIX"WR",
+	  .handler = gpio_cmd_set,
+	  .help = "<PORT> <PIN> <0/1>"
+	},
 };
 
 #define gpio_arg(a, b, c) __gpio_arg(a, sizeof(a) / sizeof(a[0]), b, c)
@@ -142,7 +151,7 @@ int gpio_port_pin(char *str, uint32_t *port, int *pin, int *idx)
 	return 0;
 }
 
-void gpio_cmd_set_cfg(char *str)
+cmd_res_t gpio_cmd_set_cfg(char *str)
 {
 	char s_drv[4];
 	char s_slope[8];
@@ -154,44 +163,41 @@ void gpio_cmd_set_cfg(char *str)
 	int idx;
 
 	if (gpio_port_pin(str, &port, &pin, &idx) < 0)
-		goto err;
+		return CMD_ERR;
 	if (gpio_pins(pin, &pins) < 0)
-		goto err;
+		return CMD_ERR;
 
 	str += idx;
 
 	if (1 == sscanf(str, "IN %8s", &s_pull)) {
 		if (gpio_arg(arg_pull, s_pull, &pull))
-			goto err;
+			return CMD_ERR;
 		gpio_set_mode(port, GPIO_MODE_INPUT, pull, pins);
 	} else if (2 == sscanf(str,"OUT %4s %8s", &s_drv, &s_slope)) {
 		if (gpio_arg(arg_slope, s_slope, &slope) < 0)
-			goto err;
+			return CMD_ERR;
 		if (gpio_arg(arg_drv, s_drv, &drv) < 0)
-			goto err;
+			return CMD_ERR;
 		gpio_set_mode(port, slope, drv, pins);
 	} else {
 	}
 
-	return;
-err:
-	cmd_send("error: wrong params. Use:");
-	cmd_send(GP_CMD_PREFIX"SETCFG <PORT> <PIN> IN <PUP/PDN/NONE>");
-	cmd_send(GP_CMD_PREFIX"SETCFG <PORT> <PIN> OUT <OD/PP> <2MHZ/10MHZ/50MHZ>");
+	return CMD_OK;
 }
 
-void gpio_cmd_set(char *str)
+cmd_res_t gpio_cmd_set(char *str)
 {
 	int on;
+
  	uint32_t port;
 	uint16_t pins;
 	int pin;
 	int idx;
 
 	if (gpio_port_pin(str, &port, &pin, &idx))
-		goto err;
+		return CMD_ERR;
 	if (gpio_pins(pin, &pins) < 0)
-		goto err;
+		return CMD_ERR;
 
 	str += idx;
 	sscanf(str, "%d", &on);
@@ -200,34 +206,28 @@ void gpio_cmd_set(char *str)
 		gpio_set(port, pins);
 	else
 		gpio_clear(port, pins);
-
-	return;
-
-err:
-	cmd_send("error: wrong params. Use:");
-	cmd_send(GP_CMD_PREFIX"WR <PORT> <PIN> <1/0>");
+	return CMD_OK;
 }
 
-void gpio_cmd_get_cfg(char *str)
+cmd_res_t gpio_cmd_get_cfg(char *str)
 {
+	return CMD_SILENT;
 }
 
-void gpio_cmd_read(char *str)
+cmd_res_t gpio_cmd_read(char *str)
 {
 	int on;
 	uint32_t port;
 	int pin;
 	int idx;
 
-	if (gpio_port_pin(str, &port, &pin, &idx)) {
-		cmd_send("error: wrong params. Use:");
-		cmd_send(GP_CMD_PREFIX"RD <PORT> <PIN>");
-		return;
-	}
+	if (gpio_port_pin(str, &port, &pin, &idx))
+		return CMD_ERR;
 
 	on = gpio_port_read(port);
 	on &= (1 << pin);
 	cmd_send(on ? "1" : "0");
+	return CMD_SILENT;
 }
 
 

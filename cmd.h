@@ -22,9 +22,16 @@
 #include <string.h>
 #define CMD_MAX 64
 
+typedef enum {
+	CMD_OK,
+	CMD_ERR,
+	CMD_SILENT
+} cmd_res_t;
+
 typedef struct {
 	char *str;
-	void (*handler)(char*);
+	char *help;
+	cmd_res_t (*handler)(char*);
 } cmd_t;
 
 struct _cmd_set_t {

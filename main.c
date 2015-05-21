@@ -64,23 +64,25 @@
  * PB15: GPIO/SPI2_MOSI
  */
 
-void cmd_fwv(char *args);
-void cmd_lic(char *args);
+cmd_res_t cmd_fwv(char *args);
+cmd_res_t cmd_lic(char *args);
 void init_modules(void);
 
 CMD_DECLARE_LIST(main_cmds) = {
-	{ .str = "FWV", .handler = cmd_fwv },
-	{ .str = "LIC", .handler = cmd_lic }
+	{ .str = "FWV", .handler = cmd_fwv, .help = NULL },
+	{ .str = "LIC", .handler = cmd_lic, .help = NULL }
 };
 
-void cmd_fwv(char *args)
+cmd_res_t cmd_fwv(char *args)
 {
 	cmd_send(FW_VERSION);
+	return CMD_SILENT;
 }
 
-void cmd_lic(char *args)
+cmd_res_t cmd_lic(char *args)
 {
 	cmd_send("GPL");
+	return CMD_SILENT;
 }
 
 void init_modules()
