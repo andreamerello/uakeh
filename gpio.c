@@ -87,7 +87,10 @@ CMD_DECLARE_LIST(gpio_cmds) = {
 	  .handler = gpio_cmd_set_cfg,
 	  .help = "<PORT> <PIN> [IN <PUP/PDN/NONE>]/[OUT <OD/PP> <2MHZ/10MHZ/50MHZ>]"
 	},
-	{ .str = GP_CMD_PREFIX"GETCFG", .handler = gpio_cmd_get_cfg },
+	{ .str = GP_CMD_PREFIX"GETCFG",
+	  .handler = gpio_cmd_get_cfg,
+	  .help = "<PORT> <PIN>"
+	},
 	{ .str = GP_CMD_PREFIX"RD",
 	  .handler = gpio_cmd_read,
 	  .help = "<PORT> <PIN>"
@@ -211,6 +214,13 @@ cmd_res_t gpio_cmd_set(char *str)
 
 cmd_res_t gpio_cmd_get_cfg(char *str)
 {
+	uint32_t port;
+	int pin;
+	int idx;
+
+	gpio_port_pin(str, &port, &pin, &idx);
+
+	//gpio_get_mode(
 	return CMD_SILENT;
 }
 
