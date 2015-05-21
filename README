@@ -4,7 +4,8 @@
 (AKA USB Army Knife for the Electronic Hobbyist)
 *************************************************
 
-WARNING: this project is in early development stage, and curently not functional yet.
+WARNING: this project is in early development stage, and currently only an extremely
+limited feature set is working.
 
 IMPORTANT NOTE: this device will show up as a USB CDCACM peripheral. This means it
 will communicate as a kind of serial port. Unfortunately Linux modem-manager
