@@ -35,6 +35,13 @@
 static cmd_set_t *cmd_set = NULL;
 static usbd_device *usb_dev;
 
+static void cmd_echo(char *);
+static int cmd_echo_en = 1;
+
+CMD_DECLARE_LIST(cmd_cmds) = {
+	{ .str = "ECHO", .handler = cmd_echo }
+};
+
 void __cmd_register_set(cmd_set_t *set)
 {
 	cmd_set_t *set_tmp;
@@ -125,8 +132,12 @@ static void cmd_parse(char *data, int len)
 	static char cmd_buf[CMD_MAX];
 	static int cmd_len = 0;
 #ifdef CMD_DEBUG_RX1
-	printf(".%x\n", data[0]);
+	printf(".%x\n", data);
 #endif
+
+	if(cmd_echo_en)
+		cdcacm_tx(data, len);
+
 	for (i = 0; i < len; i++) {
 		ch = data[i];
 
@@ -188,8 +199,15 @@ void cmd_poll()
 	usbd_poll(usb_dev);
 }
 
+void cmd_echo(char *args)
+{
+	sscanf(args, "%d", &cmd_echo_en);
+}
+
 void cmd_init()
 {
+	CMD_REGISTER_LIST(cmd_cmds);
+
 	usb_dev = cdcacm_init();
 	cdcacm_register_rx_cb(cmd_parse);
 }
