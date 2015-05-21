@@ -225,8 +225,8 @@ void gpio_cmd_read(char *str)
 		return;
 	}
 
-	on = gpio_port_read(port) & pin;
-
+	on = gpio_port_read(port);
+	on &= (1 << pin);
 	cmd_send(on ? "1" : "0");
 }
 
