@@ -36,10 +36,12 @@ static cmd_set_t *cmd_set = NULL;
 static usbd_device *usb_dev;
 
 static void cmd_echo(char *);
+static void cmd_help(char *);
 static int cmd_echo_en = 1;
 
 CMD_DECLARE_LIST(cmd_cmds) = {
-	{ .str = "ECHO", .handler = cmd_echo }
+	{ .str = "ECHO", .handler = cmd_echo },
+	{ .str = "HELP", .handler = cmd_help }
 };
 
 void __cmd_register_set(cmd_set_t *set)
@@ -122,7 +124,7 @@ static void cmd_dispatch(char *cmdstr)
 			}
 		}
 	}
-	cmd_send("Unknown command :(");
+	cmd_send("Unknown command :(\nyou may type 'HELP'..");
 }
 
 static void cmd_parse(char *data, int len)
@@ -202,6 +204,20 @@ void cmd_poll()
 void cmd_echo(char *args)
 {
 	sscanf(args, "%d", &cmd_echo_en);
+}
+
+void cmd_help(char *args)
+{
+	cmd_set_t *set;
+	int i;
+	args;
+	cmd_send("Commands:\n");
+	for (set = cmd_set; set; set = set->next) {
+		for (i = 0; i < set->len; i++) {
+			cmd_send(set->set[i].str);
+		}
+	}
+
 }
 
 void cmd_init()
