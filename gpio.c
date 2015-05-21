@@ -135,7 +135,7 @@ int gpio_port_pin(char *str, uint32_t *port, int *pin, int *idx)
 {
 	char s_port[8];
 
-	if (2 == sscanf(str, "%8s %u %n", &s_port, pin, idx))
+	if (2 != sscanf(str, "%8s %u %n", &s_port, pin, idx))
 		return -1;
 	if (gpio_arg32(arg_port, s_port, port) < 0)
 		return -2;
@@ -144,7 +144,6 @@ int gpio_port_pin(char *str, uint32_t *port, int *pin, int *idx)
 
 void gpio_cmd_set_cfg(char *str)
 {
-
 	char s_drv[4];
 	char s_slope[8];
 	char s_pull[8];
@@ -154,7 +153,7 @@ void gpio_cmd_set_cfg(char *str)
 	uint8_t pull, slope, drv;
 	int idx;
 
-	if (gpio_port_pin(str, &port, &pin, &idx))
+	if (gpio_port_pin(str, &port, &pin, &idx) < 0)
 		goto err;
 	if (gpio_pins(pin, &pins) < 0)
 		goto err;
