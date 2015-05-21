@@ -215,12 +215,50 @@ cmd_res_t gpio_cmd_set(char *str)
 cmd_res_t gpio_cmd_get_cfg(char *str)
 {
 	uint32_t port;
+	uint16_t pins;
+	uint8_t mode;
+	uint8_t cfg;
 	int pin;
 	int idx;
 
-	gpio_port_pin(str, &port, &pin, &idx);
+	if (gpio_port_pin(str, &port, &pin, &idx))
+		return CMD_ERR;
+	if (gpio_pins(pin, &pins) < 0)
+		return CMD_ERR;
 
-	//gpio_get_mode(
+	gpio_get_mode(port, &mode, &cfg, pins);
+
+	switch (mode) {
+		// case AN/ AFIO
+	case GPIO_MODE_INPUT:
+		if (cfg == GPIO_CNF_INPUT_FLOAT)
+			cmd_send("IN FLOAT");
+		else
+			cmd_send("IN PUP/PDN");
+		break;
+
+	case GPIO_MODE_OUTPUT_2_MHZ:
+		if (cfg == GPIO_CNF_OUTPUT_OPENDRAIN)
+			cmd_send("OUT 2MHz OD");
+		else
+			cmd_send("OUT 2MHz PP");
+		break;
+
+	case GPIO_MODE_OUTPUT_10_MHZ:
+		if (cfg == GPIO_CNF_OUTPUT_OPENDRAIN)
+			cmd_send("OUT 10MHz OD");
+		else
+			cmd_send("OUT 10MHz PP");
+		break;
+
+	case GPIO_MODE_OUTPUT_50_MHZ:
+		if (cfg == GPIO_CNF_OUTPUT_OPENDRAIN)
+			cmd_send("OUT 50MHz OD");
+		else
+			cmd_send("OUT 50MHz PP");
+		break;
+	}
+
 	return CMD_SILENT;
 }
 
