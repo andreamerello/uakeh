@@ -92,6 +92,16 @@ static void cmd_do_help(cmd_t *tmp_cmd)
 	}
 }
 
+static void cmd_toupper(char *str)
+{
+	unsigned int i;
+	const int offset = 'a' - 'A';
+
+	for (i = 0; i < strlen(str); i++)
+		if (str[i] >= 'a' && str[i] <= 'z')
+			str[i] -= offset;
+}
+
 static void cmd_dispatch(char *cmdstr)
 {
 	cmd_set_t *set;
@@ -101,6 +111,7 @@ static void cmd_dispatch(char *cmdstr)
 	int i;
 
 	cmd_trim(cmdstr);
+	cmd_toupper(cmdstr);
 
 	for (set = cmd_set; set; set = set->next) {
 		for (i = 0; i < set->len; i++) {
