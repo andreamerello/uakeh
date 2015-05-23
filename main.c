@@ -22,6 +22,7 @@
 #include "debug_printf.h"
 #include "cmd.h"
 #include "gpio.h"
+#include "an.h"
 
 #define FW_VERSION "V 0.1"
 
@@ -88,6 +89,7 @@ cmd_res_t cmd_lic(char *args)
 void init_modules()
 {
 	gpio_init();
+	an_init();
 }
 
 int main(void)

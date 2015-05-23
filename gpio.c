@@ -58,6 +58,8 @@ static gpio_arg_t arg_slope[] = {
 static gpio_arg_t arg_pull[] = {
 	{.str = "FLOAT", .val = GPIO_CNF_INPUT_FLOAT},
 	{.str = "NONE", .val = GPIO_CNF_INPUT_FLOAT},
+	{.str = "AN", .val = GPIO_CNF_INPUT_ANALOG},
+	{.str = "ANALOG", .val = GPIO_CNF_INPUT_ANALOG},
 	{.str = "PUP", .val = GPIO_CNF_INPUT_PULL_UPDOWN},
 	{.str = "PDN", .val = GPIO_CNF_INPUT_PULL_UPDOWN},
 	{.str = "PD", .val = GPIO_CNF_INPUT_PULL_UPDOWN},
@@ -85,7 +87,7 @@ static gpio_arg32_t arg_port[] = {
 CMD_DECLARE_LIST(gpio_cmds) = {
 	{ .str = GP_CMD_PREFIX"SETCFG",
 	  .handler = gpio_cmd_set_cfg,
-	  .help = "<PORT> <PIN> [IN <PUP/PDN/NONE>]/[OUT <OD/PP> <2MHZ/10MHZ/50MHZ>]"
+	  .help = "<PORT> <PIN> [IN <PUP/PDN/NONE/AN>]/[OUT <OD/PP> <2MHZ/10MHZ/50MHZ>]"
 	},
 	{ .str = GP_CMD_PREFIX"GETCFG",
 	  .handler = gpio_cmd_get_cfg,
@@ -229,12 +231,14 @@ cmd_res_t gpio_cmd_get_cfg(char *str)
 	gpio_get_mode(port, &mode, &cfg, pins);
 
 	switch (mode) {
-		// case AN/ AFIO
+
 	case GPIO_MODE_INPUT:
 		if (cfg == GPIO_CNF_INPUT_FLOAT)
 			cmd_send("IN FLOAT");
-		else
+		else if(cfg == GPIO_CNF_INPUT_PULL_UPDOWN)
 			cmd_send("IN PUP/PDN");
+		else
+			cmd_send("IN ANALOG");
 		break;
 
 	case GPIO_MODE_OUTPUT_2_MHZ:
