@@ -4,12 +4,12 @@
 (AKA USB Army Knife for the Electronic Hobbyist)
 *************************************************
 
+This is (the firmware for) a _fully_ open-source USB device for interfacing your PC with embedded electronic devices through digital busses. You can use it also to control relays and to read digital and analog inputs.
+
 WARNING: this project is in early development stage, and currently only an extremely limited feature set is working:
 Currently GPIOs can be configured, read (both digital and analog) and driven as digital outputs.
 
 IMPORTANT NOTE: this device will show up as a USB CDCACM peripheral. This means it will communicate as a kind of serial port. Unfortunately Linux modem-manager daemon misrecognize it as a modem, it tries to communicate with it, and this causes serious problems. You have to disable modem manager or avoid that it tries to use our device as a modem. Otherwise nothing will work!
-
-This is (the firmware for) a _fully_ open-source USB device for interfacing your PC with embedded electronic devices through digital busses.
 
 It might resemble the "bus-pirate" device for certain things but:
 - It will _not_ use any third-party proprietary library,
