@@ -19,10 +19,14 @@
 #include <stdio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
+#include <libopencm3/stm32/dma.h>
 #include "debug_printf.h"
 #include "cmd.h"
 
 #define SPI_CMD_PREFIX "SPI "
+#define SPI_DMA_TX 1
+#define SPI_DMA_RX 0
+#define SPI_DMA_PRIO 3
 
 cmd_res_t spi_cmd_xfer(char *);
 cmd_res_t spi_cmd_cfg(char *);
@@ -41,6 +45,14 @@ CMD_DECLARE_LIST(spi_cmds) = {
 		.help = "<KHz> <endian l/b> <frame 8/16> <ckpol 1/0> <chpha 1/0>"
 	}
 };
+
+void spi_set_dma_size(uint32_t size)
+{
+	dma_set_memory_size(DMA1, SPI_DMA_TX, size);
+	dma_set_memory_size(DMA1, SPI_DMA_RX, size);
+	dma_set_peripheral_size(DMA1, SPI_DMA_RX, size);
+	dma_set_peripheral_size(DMA1, SPI_DMA_RX, size);
+}
 
 cmd_res_t spi_cmd_cfg(char *str)
 {
@@ -76,9 +88,6 @@ cmd_res_t spi_cmd_cfg(char *str)
 		presc--;
 
 	spi_clean_disable(SPI1);
-	spi_set_master_mode(SPI1);
-	spi_enable_ss_output(SPI1);
-
 	spi_set_baudrate_prescaler(SPI1, presc);
 
 	if (endian == 'l')
@@ -86,10 +95,13 @@ cmd_res_t spi_cmd_cfg(char *str)
 	else
 		spi_send_msb_first(SPI1);
 
-	if (frame == 16)
+	if (frame == 16) {
 		spi_set_dff_16bit(SPI1);
-	else
+		spi_set_dma_size(DMA_CCR_MSIZE_16BIT);
+	} else {
 		spi_set_dff_8bit(SPI1);
+		spi_set_dma_size(DMA_CCR_MSIZE_8BIT);
+	}
 
 	if (ckpol)
 		spi_set_clock_polarity_1(SPI1);
@@ -101,21 +113,53 @@ cmd_res_t spi_cmd_cfg(char *str)
 	else
 		spi_set_clock_phase_0(SPI1);
 
+	spi_enable(SPI1);
 	return CMD_OK;
 }
 
 cmd_res_t spi_cmd_xfer(char *str)
 {
-	spi_enable(SPI1);
+	int len = 0;
+	void *rbuf = NULL, *tbuf = NULL;
+
+	dma_set_number_of_data(DMA1, SPI_DMA_TX, len);
+	dma_set_number_of_data(DMA1, SPI_DMA_RX, len);
+
+	dma_set_memory_address(DMA1, SPI_DMA_TX, (uint32_t)tbuf);
+	dma_set_memory_address(DMA1, SPI_DMA_RX, (uint32_t)rbuf);
+
+	dma_enable_channel(DMA1, SPI_DMA_RX);
+	dma_enable_channel(DMA1, SPI_DMA_TX);
+
+	while(dma_get_interrupt_flag(DMA1, SPI_DMA_RX, DMA_TCIF));
+
+	dma_disable_channel(DMA1, SPI_DMA_TX);
+	dma_disable_channel(DMA1, SPI_DMA_RX);
+
 	return CMD_SILENT;
 }
 
 void spi_init()
 {
-	int i;
-
 	CMD_REGISTER_LIST(spi_cmds);
 
 	rcc_periph_clock_enable(RCC_SPI1);
+	rcc_periph_clock_enable(RCC_DMA1);
+
 	spi_reset(SPI1);
+	spi_set_master_mode(SPI1);
+	spi_enable_ss_output(SPI1);
+
+	dma_channel_reset(DMA1, SPI_DMA_TX);
+	dma_channel_reset(DMA1, SPI_DMA_RX);
+	dma_enable_memory_increment_mode(DMA1, SPI_DMA_TX);
+	dma_enable_memory_increment_mode(DMA1, SPI_DMA_RX);
+	dma_disable_peripheral_increment_mode(DMA1, SPI_DMA_TX);
+	dma_disable_peripheral_increment_mode(DMA1, SPI_DMA_RX);
+	dma_set_peripheral_address(DMA1, SPI_DMA_TX, SPI1_DR);
+	dma_set_peripheral_address(DMA1, SPI_DMA_RX, SPI1_DR);
+	dma_set_read_from_memory(DMA1, SPI_DMA_TX);
+	dma_set_read_from_peripheral(DMA1, SPI_DMA_RX);
+	dma_set_priority(DMA1, SPI_DMA_RX, SPI_DMA_PRIO);
+	dma_set_priority(DMA1, SPI_DMA_TX, SPI_DMA_PRIO);
 }
