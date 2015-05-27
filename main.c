@@ -23,6 +23,7 @@
 #include "cmd.h"
 #include "gpio.h"
 #include "an.h"
+#include "spi.h"
 
 #define FW_VERSION "V 0.1"
 
@@ -90,6 +91,7 @@ void init_modules()
 {
 	gpio_init();
 	an_init();
+	spi_init();
 }
 
 int main(void)
