@@ -25,7 +25,7 @@
 
 #define SPI_CMD_PREFIX "SPI "
 #define SPI_DMA_TX 1
-#define SPI_DMA_RX 0
+#define SPI_DMA_RX 2
 #define SPI_DMA_PRIO 3
 
 cmd_res_t spi_cmd_xfer(char *);
