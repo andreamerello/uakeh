@@ -37,7 +37,7 @@ CMD_DECLARE_LIST(spi_cmds) = {
 	{
 		.str = SPI_CMD_PREFIX"XFER",
 		.handler = spi_cmd_xfer,
-		.help = "<len> <dat 1> .. <dat len>"
+		.help = "<len> <dat #1> .. <dat #len>"
 	},
 	{
 		.str = SPI_CMD_PREFIX"CFG",
