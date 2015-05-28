@@ -46,6 +46,13 @@ static gpio_arg_t arg_drv[] = {
 	{.str = "TP", .val = GPIO_CNF_OUTPUT_PUSHPULL},
 };
 
+static gpio_arg_t arg_af_drv[] = {
+	{.str = "OD", .val = GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN},
+	{.str = "OC", .val = GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN},
+	{.str = "PP", .val = GPIO_CNF_OUTPUT_ALTFN_PUSHPULL},
+	{.str = "TP", .val = GPIO_CNF_OUTPUT_ALTFN_PUSHPULL},
+};
+
 static gpio_arg_t arg_slope[] = {
 	{.str = "2MHZ", .val = GPIO_MODE_OUTPUT_2_MHZ},
 	{.str = "2", .val = GPIO_MODE_OUTPUT_2_MHZ},
@@ -87,7 +94,7 @@ static gpio_arg32_t arg_port[] = {
 CMD_DECLARE_LIST(gpio_cmds) = {
 	{ .str = GP_CMD_PREFIX"SETCFG",
 	  .handler = gpio_cmd_set_cfg,
-	  .help = "<PORT> <PIN> [IN <PUP/PDN/NONE/AN>]/[OUT <OD/PP> <2MHZ/10MHZ/50MHZ>]"
+	  .help = "<PORT> <PIN> [IN <PUP/PDN/NONE/AN>]/[<OUT/AF> <OD/PP> <2MHZ/10MHZ/50MHZ>]"
 	},
 	{ .str = GP_CMD_PREFIX"GETCFG",
 	  .handler = gpio_cmd_get_cfg,
@@ -178,13 +185,20 @@ cmd_res_t gpio_cmd_set_cfg(char *str)
 		if (gpio_arg(arg_pull, s_pull, &pull))
 			return CMD_ERR;
 		gpio_set_mode(port, GPIO_MODE_INPUT, pull, pins);
-	} else if (2 == sscanf(str,"OUT %4s %8s", &s_drv, &s_slope)) {
+	} else {
+		if (2 == sscanf(str,"OUT %4s %8s", &s_drv, &s_slope)) {
+			if (gpio_arg(arg_drv, s_drv, &drv) < 0)
+				return CMD_ERR;
+		} else if (2 == sscanf(str,"AF %4s %8s", &s_drv, &s_slope)) {
+			if (gpio_arg(arg_af_drv, s_drv, &drv) < 0)
+				return CMD_ERR;
+		} else {
+			return CMD_ERR;
+		}
+
 		if (gpio_arg(arg_slope, s_slope, &slope) < 0)
 			return CMD_ERR;
-		if (gpio_arg(arg_drv, s_drv, &drv) < 0)
-			return CMD_ERR;
 		gpio_set_mode(port, slope, drv, pins);
-	} else {
 	}
 
 	return CMD_OK;
