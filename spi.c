@@ -17,6 +17,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
 #include <libopencm3/stm32/dma.h>
@@ -119,8 +120,37 @@ cmd_res_t spi_cmd_cfg(char *str)
 
 cmd_res_t spi_cmd_xfer(char *str)
 {
-	int len = 0;
-	void *rbuf = NULL, *tbuf = NULL;
+	int i, idx, sz, ascii_sz, len, val, val_mask;
+	void *rbuf, *tbuf, *tmpbuf;
+	char *abuf;
+	const char *rx_format = (spi_frame == 8) ? "0x%2x " : "0x%4x ";
+	sz = (spi_frame == 8) ? 1 : 2;
+	/* Worst case ascii len for response.
+	 * Take in account "0x" prefix, space at end, and digits (2 x bytes)
+	 */
+	ascii_sz = 3 + sz * 2;
+	val_mask = (1 << spi_frame) - 1;
+	if (1 != sscanf(str, "%d %n", &len, &idx))
+		return CMD_ERR;
+
+	rbuf = alloca(len * sz);
+	/* to save memory, allocate only one buffer that can
+	 * carry the TX payload and the ascii temp buffer
+	 * for processing RX data. (the latter is certainly
+	 * not smaller).
+	 */
+	tmpbuf = alloca(len * ascii_sz + 1);
+	abuf = (char*)(tbuf = tmpbuf);
+	str += idx;
+
+	for (i = 0; i < len; i++) {
+		if (1 != sscanf(str, "0x%x %n", &val, &idx))
+			return CMD_ERR;
+		if (val & ~val_mask)
+			return CMD_ERR;
+	        memcpy(tbuf + i * sz, &val, sz);
+		str += idx;
+	}
 
 	dma_set_number_of_data(DMA1, SPI_DMA_TX, len);
 	dma_set_number_of_data(DMA1, SPI_DMA_RX, len);
@@ -135,6 +165,12 @@ cmd_res_t spi_cmd_xfer(char *str)
 
 	dma_disable_channel(DMA1, SPI_DMA_TX);
 	dma_disable_channel(DMA1, SPI_DMA_RX);
+
+	idx = 0;
+	for (i = 0; i < len; i++)
+		idx += sprintf(abuf + idx, rx_format, rbuf + sz * i);
+
+	cmd_send(abuf);
 
 	return CMD_SILENT;
 }
