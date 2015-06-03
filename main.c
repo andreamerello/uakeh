@@ -103,17 +103,15 @@ void test(void)
 		      GPIO_TIM1_CH1 );
 
 	timer_reset(TIM1);
-	timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
-	timer_set_prescaler(TIM1, 10);
-	timer_set_period(TIM1, 3000);
+	timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1, TIM_CR1_DIR_DOWN);
+	timer_set_prescaler(TIM1, 12);
+	timer_set_period(TIM1, 40000);
 	timer_set_repetition_counter(TIM1, 0);
 	timer_continuous_mode(TIM1);
 
-	timer_set_deadtime(TIM1, 10);
 	timer_set_enabled_off_state_in_idle_mode(TIM1);
-	timer_set_enabled_off_state_in_run_mode(TIM1);
+	timer_set_disabled_off_state_in_run_mode(TIM1);
 	timer_disable_break(TIM1);
-
 
 	timer_disable_oc_clear(TIM1, TIM_OC1);
 	timer_enable_oc_preload(TIM1, TIM_OC1);
@@ -125,13 +123,12 @@ void test(void)
 	timer_set_oc_idle_state_set(TIM1, TIM_OC1);
 
 	/* Set the capture compare value for OC1. */
-	timer_set_oc_value(TIM1, TIM_OC1, 10000);
-	timer_enable_oc_output(TIM1, TIM_OC1);
-
+//	timer_set_oc_value(TIM1, TIM_OC1, 1830); //1ms
+//	timer_set_oc_value(TIM1, TIM_OC1, 2750); //1.5ms
+	timer_set_oc_value(TIM1, TIM_OC1, 3670); //2ms
 	timer_enable_preload(TIM1);
-
+	timer_enable_oc_preload(TIM1, TIM_OC1);
 	timer_enable_counter(TIM1);
-
 }
 
 int main(void)
