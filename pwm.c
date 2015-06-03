@@ -58,10 +58,16 @@ void pwm_set_perc(float f_perc)
 {
 	unsigned long i_perc;
 
-#warning TBD_RC-mode
-	i_perc = (unsigned long)(f_perc * pwm_max_period);
-	i_perc /= 100;
-
+	if (pwm_rc_mode) {
+		/* in RC mode a 1ms pulse is zero, 2ms pulse is max.
+		 * PWM freq is 50Hz (period 20mS).
+		 * max is 1/10 period. min is 1/20 period.
+		 */
+		i_perc = (float)pwm_max_period / (20.0 - (f_perc * 10.0) / 100.0);
+	} else {
+		i_perc = (unsigned long)(f_perc * pwm_max_period);
+		i_perc /= 100;
+	}
 	timer_set_oc_value(TIM1, TIM_OC1, i_perc);
 }
 
