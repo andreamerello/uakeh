@@ -27,18 +27,108 @@
 
 #define AN_CMD_PREFIX "PWM "
 
-cmd_res_t pwm_cmd_xxx(char *);
+cmd_res_t pwm_cmd_set_frq(char *str);
+cmd_res_t pwm_cmd_set_perc(char *str);
+cmd_res_t pwm_cmd_enable(char *str);
+
+/* for R/C servo and ESC */
+static int pwm_rc_mode = 0;
+static int pwm_max_period;
 
 CMD_DECLARE_LIST(pwm_cmds) = {
 	{
-		.str = AN_CMD_PREFIX"xxx",
-		.handler = pwm_cmd_xxx,
-		.help = "xxx"
-	}
+		.str = AN_CMD_PREFIX"EN",
+		.handler = pwm_cmd_enable,
+		.help = "<1/0>"
+	},
+	{
+		.str = AN_CMD_PREFIX"FREQ",
+		.handler = pwm_cmd_enable,
+		.help = "[<HZ>/RC]"
+	},
+	{
+		.str = AN_CMD_PREFIX"PERC",
+		.handler = pwm_cmd_enable,
+		.help = "<percentage>"
+	},
+
 };
 
-cmd_res_t pwm_cmd_xxx(char *str)
+void pwm_set_perc(float f_perc)
 {
+	unsigned long i_perc;
+
+#warning TBD_RC-mode
+	i_perc = (unsigned long)(f_perc * pwm_max_period);
+	i_perc /= 100;
+
+	timer_set_oc_value(TIM1, TIM_OC1, i_perc);
+}
+
+cmd_res_t pwm_cmd_set_perc(char *str)
+{
+	float f_perc;
+
+	if (1 != sscanf(str, "%f", &f_perc))
+			return CMD_ERR;
+	if ((f_perc > 100) || (f_perc < 0))
+		return CMD_ERR;
+	pwm_set_perc(f_perc);
+	return CMD_OK;
+}
+
+cmd_res_t pwm_cmd_set_frq(char *str)
+{
+	unsigned long freq, ratio, presc;
+#warning TBD_realclock
+	const unsigned long clock = 48000000;
+
+	if (strcmp(str, "RC") == 0) {
+		pwm_rc_mode = 1;
+		freq = 50;
+	} else {
+		pwm_rc_mode = 0;
+		if (1 != sscanf(str, "%lu", &freq))
+			return CMD_ERR;
+	}
+
+	if (freq > clock)
+		return CMD_ERR;
+
+	/* final ratio */
+	ratio = clock / freq;
+	presc = ratio / 65535;
+
+	pwm_max_period = ratio / (presc + 1);
+
+	timer_set_prescaler(TIM1, presc);
+	timer_set_period(TIM1, pwm_max_period);
+
+	if (pwm_rc_mode) {
+		pwm_set_perc(0.0);
+	} else {
+		pwm_set_perc(50.0);
+	}
+
+	return CMD_OK;
+}
+
+cmd_res_t pwm_cmd_enable(char *str)
+{
+	unsigned int en;
+
+	if (1 != sscanf(str, "%u", &en))
+		return CMD_ERR;
+	if (en != !!en)
+		return CMD_ERR;
+
+	if (en) {
+		timer_enable_oc_output(TIM1, TIM_OC1);
+		timer_enable_counter(TIM1);
+	} else {
+		timer_disable_oc_output(TIM1, TIM_OC1);
+		timer_disable_counter(TIM1);
+	}
 	return CMD_OK;
 }
 
@@ -53,9 +143,8 @@ void pwm_init()
 		      GPIO_TIM1_CH1 );
 */
 	timer_reset(TIM1);
-	timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1, TIM_CR1_DIR_DOWN);
-	timer_set_prescaler(TIM1, 12);
-	timer_set_period(TIM1, 40000);
+	timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT,
+		TIM_CR1_CMS_CENTER_1, TIM_CR1_DIR_DOWN);
 	timer_set_repetition_counter(TIM1, 0);
 	timer_continuous_mode(TIM1);
 
@@ -64,19 +153,12 @@ void pwm_init()
 	timer_disable_break(TIM1);
 
 	timer_disable_oc_clear(TIM1, TIM_OC1);
-	timer_enable_oc_preload(TIM1, TIM_OC1);
 	timer_set_oc_slow_mode(TIM1, TIM_OC1);
 	timer_set_oc_mode(TIM1, TIM_OC1, TIM_OCM_PWM1);
 
 	timer_set_oc_polarity_high(TIM1, TIM_OC1);
 	timer_set_oc_idle_state_set(TIM1, TIM_OC1);
 
-
-//	timer_set_oc_value(TIM1, TIM_OC1, 1830); //1ms
-//	timer_set_oc_value(TIM1, TIM_OC1, 2750); //1.5ms
-	timer_set_oc_value(TIM1, TIM_OC1, 3670); //2ms
-
 	timer_enable_preload(TIM1);
 	timer_enable_oc_preload(TIM1, TIM_OC1);
-	timer_enable_counter(TIM1);
 }
