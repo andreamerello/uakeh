@@ -80,8 +80,7 @@ cmd_res_t pwm_cmd_set_perc(char *str)
 cmd_res_t pwm_cmd_set_frq(char *str)
 {
 	unsigned long freq, ratio, presc;
-#warning TBD_realclock
-	const unsigned long clock = 48000000;
+	const unsigned long clock = rcc_apb2_frequency;
 
 	if (strcmp(str, "RC") == 0) {
 		pwm_rc_mode = 1;
@@ -96,7 +95,7 @@ cmd_res_t pwm_cmd_set_frq(char *str)
 		return CMD_ERR;
 
 	/* final ratio */
-	ratio = clock / freq;
+	ratio = clock / 2 / freq;
 	presc = ratio / 65535;
 
 	pwm_max_period = ratio / (presc + 1);
