@@ -24,6 +24,7 @@
 #include "gpio.h"
 #include "an.h"
 #include "spi.h"
+#include "pwm.h"
 
 #define FW_VERSION "V 0.1"
 
@@ -92,6 +93,7 @@ void init_modules()
 	gpio_init();
 	an_init();
 	spi_init();
+	pwm_init();
 }
 
 int main(void)
