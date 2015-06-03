@@ -43,12 +43,12 @@ CMD_DECLARE_LIST(pwm_cmds) = {
 	},
 	{
 		.str = AN_CMD_PREFIX"FREQ",
-		.handler = pwm_cmd_enable,
+		.handler = pwm_cmd_set_frq,
 		.help = "[<HZ>/RC]"
 	},
 	{
 		.str = AN_CMD_PREFIX"PERC",
-		.handler = pwm_cmd_enable,
+		.handler = pwm_cmd_set_perc,
 		.help = "<percentage>"
 	},
 
