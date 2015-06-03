@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
-#include <libopencm3/stm32/timer.h>
 #include "debug_printf.h"
 #include "cmd.h"
 #include "gpio.h"
@@ -95,42 +94,6 @@ void init_modules()
 	spi_init();
 }
 
-void test(void)
-{
-	rcc_periph_clock_enable(RCC_TIM1);
-	gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ,
-		      GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
-		      GPIO_TIM1_CH1 );
-
-	timer_reset(TIM1);
-	timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_CENTER_1, TIM_CR1_DIR_DOWN);
-	timer_set_prescaler(TIM1, 12);
-	timer_set_period(TIM1, 40000);
-	timer_set_repetition_counter(TIM1, 0);
-	timer_continuous_mode(TIM1);
-
-	timer_set_enabled_off_state_in_idle_mode(TIM1);
-	timer_set_disabled_off_state_in_run_mode(TIM1);
-	timer_disable_break(TIM1);
-
-	timer_disable_oc_clear(TIM1, TIM_OC1);
-	timer_enable_oc_preload(TIM1, TIM_OC1);
-	timer_set_oc_slow_mode(TIM1, TIM_OC1);
-	timer_set_oc_mode(TIM1, TIM_OC1, TIM_OCM_PWM1);
-
-	/* Configure OC1. */
-	timer_set_oc_polarity_high(TIM1, TIM_OC1);
-	timer_set_oc_idle_state_set(TIM1, TIM_OC1);
-
-	/* Set the capture compare value for OC1. */
-//	timer_set_oc_value(TIM1, TIM_OC1, 1830); //1ms
-//	timer_set_oc_value(TIM1, TIM_OC1, 2750); //1.5ms
-	timer_set_oc_value(TIM1, TIM_OC1, 3670); //2ms
-	timer_enable_preload(TIM1);
-	timer_enable_oc_preload(TIM1, TIM_OC1);
-	timer_enable_counter(TIM1);
-}
-
 int main(void)
 {
 	int i;
@@ -144,7 +107,7 @@ int main(void)
 	CMD_REGISTER_LIST(main_cmds);
 	init_modules();
 	printf("Init complete..\n");
-	test();
+
 	while (1) {
 		cmd_poll();
 	}
