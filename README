@@ -4,20 +4,21 @@
 (AKA USB Army Knife for the Electronic Hobbyist)
 *************************************************
 
-This is (the firmware for) a _fully_ open-source USB device for interfacing your PC with embedded electronic devices through digital busses (I2C, SPI, ..). You can use it also to control relays and to read digital and analog inputs.
+This is (the firmware for) a _fully_ open-source USB device for interfacing your PC with embedded electronic devices through digital busses (I2C, SPI, ..). You can use it also to control relays and to read digital and analog inputs, and to generate PWM signals.
 
-WARNING: this project is in early development stage, and currently only an extremely limited feature set is working:
-Currently GPIOs can be configured, read (both digital and analog) and driven as digital outputs.
+WARNING: this project is in early development stage, and currently only an extremely limited feature set is working.
 
 IMPORTANT NOTE: this device will show up as a USB CDCACM peripheral. This means it will communicate as a kind of serial port. Unfortunately Linux modem-manager daemon misrecognize it as a modem, it tries to communicate with it, and this causes serious problems. You have to disable modem manager or avoid that it tries to use our device as a modem. Otherwise nothing will work!
 
 This project might resemble the "bus-pirate" device for certain things but:
 - It will _not_ use any third-party proprietary library,
 - It will _not_ need any proprietary/closed-source compilers/IDE. It is compilable with GCC and a Linux box, and it can be flashed with OpenOCD and an homebrew JTAG interface
-- It uses cheap, but quite powerful, ST Cortex-M3 ARM MCU.
+- It uses cheap, but quite powerful, ST Cortex-M3 ARM MCU (currently I'm using a "LC technology" board with a STM32F103C8T6. These are common and cheap on ebay).
 - It has *a lot* of in/out pins and it will be probably capable of working on more than one bus (same or different type) at the same time.
 - Both slave/master role as well as "sniffer" or "man-in-the-middle" functionalities will be implemented where possible/applicable.
 - it will have some common features, but it will certainly differs for some other :)
+
+Currently the fw supports an ASCII command interface via the USB-serial. In future I would like to use it also as a Linux GPIO/IIO device or something like that..
 
 This device has 31 pins that can be configured in several manner including:
 - GPO: up to 31
@@ -26,6 +27,15 @@ This device has 31 pins that can be configured in several manner including:
 - I2C: up to 2
 - SPI: up to 2
 - AN:  up to 10
+- TIMERS (PWM): a lot...
+
 1 wire protocols might be also implemented.
 Parallel-bus/logic analyzer are possible on GPI/GPO pins.
 Porting on other MCU of the same family, with more pins and more functions should be relatively easy :)
+
+FEATURES CURRENTLY IMPLEMENTED:
+
+- GPIO configuration (slope, totem-pole vs open-collector, etc)
+- GPIO read/set
+- Analog IN read
+- PWM generation, including a dedicated mode for R/C devices (hobby ESC and servos).
