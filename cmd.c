@@ -159,17 +159,65 @@ static void cmd_dispatch(char *cmdstr)
 	cmd_send("Unknown command :(\nyou may type 'HELP'..");
 }
 
+/* cuts the current data buffer where needed and returns the
+ * number of characters to cut off from the command buffer
+ * before appending data to it.
+ */
+static int cmd_backspace(char *data, int *_len)
+{
+	int i, len;
+	int buf_shorten = 0;
+
+	len = *_len;
+	for (i = 0; i < len; i++) {
+		/* got a backspace */
+		if (data[i] == '\b') {
+			/* if it's the first char */
+			if (i == 0) {
+				/* throw it away */
+				len--;
+				memmove(data, data + 1, len);
+				/* and shorten the command buffer by one */
+				buf_shorten++;
+			} else {
+				/* if it's in the middle of the data we
+				 * have to move the tail over the BS itslef
+				 * and the deleted char
+				 */
+				if ((i + 1) != len) {
+					memmove(data + i - 1, data + i + 1,
+						len - (i + 1));
+				}
+				/* throw away BS and prev char */
+				len -= 2;
+			}
+		}
+	}
+	*_len = len;
+	return buf_shorten;
+}
+
 static void cmd_parse(char *data, int len)
 {
 	int i;
 	char ch;
+	int shorten;
 	static char cmd_buf[CMD_MAX];
 	static int cmd_len = 0;
 #ifdef CMD_DEBUG_RX1
 	printf(".%x\n", data);
 #endif
 
-	if(cmd_echo_en)
+
+	shorten = cmd_backspace(data, &len);
+	shorten = (cmd_len > shorten) ? shorten : cmd_len;
+	cmd_len -= shorten;
+
+	for (i = 0; i < shorten; i++) {
+		cdcacm_tx("\b \b",  3);
+	}
+
+	if (cmd_echo_en)
 		cdcacm_tx(data, len);
 
 	for (i = 0; i < len; i++) {
