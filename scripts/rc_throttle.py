@@ -70,6 +70,10 @@ def ui_throttle():
         t = throttle + step
     elif (i == 'd') and (throttle >= step):
         t = throttle - step
+    elif (i == 'f'):
+        t = 100.0
+    elif (i == 'z'):
+        t = 0.0
     elif (i == 'q'):
         return None
     return t
@@ -87,7 +91,7 @@ except:
 tty.setraw(sys.stdin.fileno())
 init_uakeh(ser)
 clear_screen()
-print("Use 'u' and 'd' keys, or q to quit")
+print("Use 'u' (up), 'd' (down), 'z' (zero), 'f' (full) keys, or q to quit")
 while(True):
     t = ui_throttle()
     if (t == None):
