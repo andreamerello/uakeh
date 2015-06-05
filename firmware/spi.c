@@ -124,6 +124,7 @@ cmd_res_t spi_cmd_xfer(char *str)
 	void *rbuf, *tbuf, *tmpbuf;
 	char *abuf;
 	const char *rx_format = (spi_frame == 8) ? "0x%2x " : "0x%4x ";
+
 	sz = (spi_frame == 8) ? 1 : 2;
 	/* Worst case ascii len for response.
 	 * Take in account "0x" prefix, space at end, and digits (2 x bytes)

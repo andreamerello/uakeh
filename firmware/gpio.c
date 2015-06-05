@@ -249,7 +249,7 @@ cmd_res_t gpio_cmd_get_cfg(char *str)
 	case GPIO_MODE_INPUT:
 		if (cfg == GPIO_CNF_INPUT_FLOAT)
 			cmd_send("IN FLOAT");
-		else if(cfg == GPIO_CNF_INPUT_PULL_UPDOWN)
+		else if (cfg == GPIO_CNF_INPUT_PULL_UPDOWN)
 			cmd_send("IN PUP/PDN");
 		else
 			cmd_send("IN ANALOG");

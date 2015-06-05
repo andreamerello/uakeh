@@ -47,6 +47,7 @@ CMD_DECLARE_LIST(cmd_cmds) = {
 void __cmd_register_set(cmd_set_t *set)
 {
 	cmd_set_t *set_tmp;
+
 #ifdef DEBUG_CMD_REG
 	printf("registering command set. len %d\n", set->len);
 #endif
@@ -150,7 +151,7 @@ static void cmd_dispatch(char *cmdstr)
 				ret = tmp_cmd->handler(cmdstr + cmdlen);
 				if (ret == CMD_ERR)
 					cmd_do_help(tmp_cmd);
-				else if(ret == CMD_OK)
+				else if (ret == CMD_OK)
 					cmd_send("OK!");
 				return;
 			}
@@ -204,6 +205,7 @@ static void cmd_parse(char *data, int len)
 	int shorten;
 	static char cmd_buf[CMD_MAX];
 	static int cmd_len = 0;
+
 #ifdef CMD_DEBUG_RX1
 	printf(".%x\n", data);
 #endif

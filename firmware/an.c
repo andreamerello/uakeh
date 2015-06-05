@@ -68,6 +68,7 @@ cmd_res_t an_cmd_read(char *str)
 void an_init()
 {
 	int i;
+
 	CMD_REGISTER_LIST(an_cmds);
 
 	rcc_periph_clock_enable(RCC_ADC1);
