@@ -145,7 +145,7 @@ cmd_res_t spi_cmd_xfer(char *str)
 	str += idx;
 
 	for (i = 0; i < len; i++) {
-		if (1 != sscanf(str, "0x%x %n", &val, &idx))
+		if (1 != sscanf(str, "%x %n", &val, &idx))
 			return CMD_ERR;
 		if (val & ~val_mask)
 			return CMD_ERR;
