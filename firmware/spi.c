@@ -32,7 +32,8 @@
 cmd_res_t spi_cmd_xfer(char *);
 cmd_res_t spi_cmd_cfg(char *);
 
-unsigned int spi_khz, spi_endian, spi_frame, spi_ckpol, spi_ckpha, spi_presc;
+unsigned int spi_khz, spi_ckpol, spi_ckpha, spi_presc, spi_frame;
+char spi_endian;
 
 CMD_DECLARE_LIST(spi_cmds) = {
 	{
