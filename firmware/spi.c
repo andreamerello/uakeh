@@ -119,7 +119,8 @@ cmd_res_t spi_cmd_cfg(char *str)
 
 cmd_res_t spi_cmd_xfer(char *str)
 {
-	int i, idx, sz, ascii_sz, len, val, val_mask;
+	int idx, sz, ascii_sz, val, val_mask;
+	unsigned int i, len;
 	void *rbuf, *tbuf, *tmpbuf;
 	char *abuf;
 	const char *rx_format = (spi_frame == 8) ? "0x%2x " : "0x%4x ";
@@ -130,7 +131,7 @@ cmd_res_t spi_cmd_xfer(char *str)
 	 */
 	ascii_sz = 3 + sz * 2;
 	val_mask = (1 << spi_frame) - 1;
-	if (1 != sscanf(str, "%d %n", &len, &idx))
+	if (1 != sscanf(str, "%u %n", &len, &idx))
 		return CMD_ERR;
 
 	rbuf = alloca(len * sz);
