@@ -236,6 +236,7 @@ cmd_res_t gpio_cmd_get_cfg(char *str)
 	uint8_t cfg;
 	int pin;
 	int idx;
+	char tmp[16];
 
 	if (gpio_port_pin(str, &port, &pin, &idx))
 		return CMD_ERR;
@@ -245,7 +246,6 @@ cmd_res_t gpio_cmd_get_cfg(char *str)
 	gpio_get_mode(port, &mode, &cfg, pins);
 
 	switch (mode) {
-
 	case GPIO_MODE_INPUT:
 		if (cfg == GPIO_CNF_INPUT_FLOAT)
 			cmd_send("IN FLOAT");
@@ -253,30 +253,39 @@ cmd_res_t gpio_cmd_get_cfg(char *str)
 			cmd_send("IN PUP/PDN");
 		else
 			cmd_send("IN ANALOG");
+
+		return CMD_SILENT;
 		break;
 
 	case GPIO_MODE_OUTPUT_2_MHZ:
-		if (cfg == GPIO_CNF_OUTPUT_OPENDRAIN)
-			cmd_send("OUT 2MHz OD");
-		else
-			cmd_send("OUT 2MHz PP");
+		strcpy(tmp, "2MHz ");
 		break;
 
 	case GPIO_MODE_OUTPUT_10_MHZ:
-		if (cfg == GPIO_CNF_OUTPUT_OPENDRAIN)
-			cmd_send("OUT 10MHz OD");
-		else
-			cmd_send("OUT 10MHz PP");
+		strcpy(tmp, "10MHz ");
 		break;
 
 	case GPIO_MODE_OUTPUT_50_MHZ:
-		if (cfg == GPIO_CNF_OUTPUT_OPENDRAIN)
-			cmd_send("OUT 50MHz OD");
-		else
-			cmd_send("OUT 50MHz PP");
+		strcpy(tmp, "50MHz ");
 		break;
 	}
 
+	switch (cfg) {
+	case GPIO_CNF_OUTPUT_OPENDRAIN:
+		strcat(tmp, "OUT OD");
+		break;
+	case GPIO_CNF_OUTPUT_PUSHPULL:
+		strcat(tmp, "OUT PP");
+		break;
+	case GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN:
+		strcat(tmp, "AF OD");
+		break;
+	case GPIO_CNF_OUTPUT_ALTFN_PUSHPULL:
+		strcat(tmp, "AF PP");
+		break;
+	}
+
+	cmd_send(tmp);
 	return CMD_SILENT;
 }
 
