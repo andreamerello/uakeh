@@ -123,7 +123,7 @@ cmd_res_t spi_cmd_xfer(char *str)
 	unsigned int i, len;
 	void *rbuf, *tbuf, *tmpbuf;
 	char *abuf;
-	const char *rx_format = (spi_frame == 8) ? "0x%2x " : "0x%4x ";
+	const char *rx_format = (spi_frame == 8) ? "0x%02x " : "0x%04x ";
 
 	sz = (spi_frame == 8) ? 1 : 2;
 	/* Worst case ascii len for response.
