@@ -168,8 +168,14 @@ cmd_res_t spi_cmd_xfer(char *str)
 	dma_disable_channel(DMA1, SPI_DMA_RX);
 
 	idx = 0;
-	for (i = 0; i < len; i++)
-		idx += sprintf(abuf + idx, rx_format, rbuf + sz * i);
+	for (i = 0; i < len; i++) {
+		if (spi_frame == 8) {
+			val = *(uint8_t*)(rbuf + i);
+		} else {
+			val = *(uint16_t*)(rbuf + i * 2);
+		}
+		idx += sprintf(abuf + idx, rx_format, val);
+	}
 
 	cmd_send(abuf);
 
