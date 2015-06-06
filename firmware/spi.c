@@ -57,7 +57,6 @@ void spi_set_dma_size(uint32_t size)
 
 cmd_res_t spi_cmd_cfg(char *str)
 {
-
 	unsigned int khz, endian, frame, ckpol, ckpha, presc;
 	int clock = rcc_apb2_frequency / 1000;
 
@@ -66,7 +65,7 @@ cmd_res_t spi_cmd_cfg(char *str)
 		return CMD_ERR;
 	if ((ckpol != !!ckpol) || (ckpha != !!ckpha))
 		return CMD_ERR;
-	if ((endian != 'l') && (endian != 'b'))
+	if ((endian != 'L') && (endian != 'B'))
 		return CMD_ERR;
 	if ((frame != 8) && (frame != 16))
 		return CMD_ERR;
