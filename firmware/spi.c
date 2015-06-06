@@ -32,7 +32,7 @@
 cmd_res_t spi_cmd_xfer(char *);
 cmd_res_t spi_cmd_cfg(char *);
 
-unsigned int spi_khz, spi_ckpol, spi_ckpha, spi_presc, spi_frame;
+unsigned int spi_khz, spi_ckpol, spi_ckpha, spi_presc, spi_frame = 0;
 char spi_endian;
 
 CMD_DECLARE_LIST(spi_cmds) = {
@@ -126,6 +126,10 @@ cmd_res_t spi_cmd_xfer(char *str)
 	char *abuf;
 	const char *rx_format = (spi_frame == 8) ? "0x%02x " : "0x%04x ";
 
+	if (spi_frame == 0) {
+		cmd_send("Err: SPI not configured!");
+		return CMD_SILENT;
+	}
 	sz = (spi_frame == 8) ? 1 : 2;
 	/* Worst case ascii len for response.
 	 * Take in account "0x" prefix, space at end, and digits (2 x bytes)
