@@ -87,7 +87,7 @@ cmd_res_t spi_cmd_cfg(char *str)
 	if (presc == 8)
 		presc--;
 
-	spi_clean_disable(SPI1);
+	spi_disable(SPI1);
 	spi_set_baudrate_prescaler(SPI1, presc);
 
 	if (endian == 'l')
