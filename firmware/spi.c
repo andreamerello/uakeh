@@ -25,7 +25,7 @@
 #include "cmd.h"
 
 #define SPI_CMD_PREFIX "SPI "
-#define SPI_DMA_TX 1
+#define SPI_DMA_TX 3
 #define SPI_DMA_RX 2
 #define SPI_DMA_PRIO 3
 
