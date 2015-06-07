@@ -25,8 +25,8 @@
 #include "cmd.h"
 
 #define SPI_CMD_PREFIX "SPI "
-#define SPI_DMA_TX 3
-#define SPI_DMA_RX 2
+#define SPI_DMA_TX DMA_CHANNEL3
+#define SPI_DMA_RX DMA_CHANNEL2
 #define SPI_DMA_PRIO 3
 
 cmd_res_t spi_cmd_xfer(char *);
