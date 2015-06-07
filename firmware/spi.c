@@ -50,10 +50,19 @@ CMD_DECLARE_LIST(spi_cmds) = {
 
 void spi_set_dma_size(uint32_t size)
 {
-	dma_set_memory_size(DMA1, SPI_DMA_TX, size);
-	dma_set_memory_size(DMA1, SPI_DMA_RX, size);
-	dma_set_peripheral_size(DMA1, SPI_DMA_RX, size);
-	dma_set_peripheral_size(DMA1, SPI_DMA_RX, size);
+	uint32_t msize, psize;
+
+	if (size == 8) {
+		msize = DMA_CCR_MSIZE_8BIT;
+		psize = DMA_CCR_PSIZE_8BIT;
+	} else {
+		msize = DMA_CCR_MSIZE_16BIT;
+		psize = DMA_CCR_PSIZE_16BIT;
+	}
+	dma_set_memory_size(DMA1, SPI_DMA_TX, msize);
+	dma_set_memory_size(DMA1, SPI_DMA_RX, msize);
+	dma_set_peripheral_size(DMA1, SPI_DMA_RX, psize);
+	dma_set_peripheral_size(DMA1, SPI_DMA_RX, psize);
 }
 
 cmd_res_t spi_cmd_cfg(char *str)
@@ -96,12 +105,11 @@ cmd_res_t spi_cmd_cfg(char *str)
 	else
 		spi_send_msb_first(SPI1);
 
-	if (frame == 16) {
-		spi_set_dff_16bit(SPI1);
-		spi_set_dma_size(DMA_CCR_MSIZE_16BIT);
-	} else {
+	spi_set_dma_size(frame);
+	if (frame == 8) {
 		spi_set_dff_8bit(SPI1);
-		spi_set_dma_size(DMA_CCR_MSIZE_8BIT);
+	} else {
+		spi_set_dff_16bit(SPI1);
 	}
 
 	if (ckpol)
