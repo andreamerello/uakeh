@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #interactive R/C PWM throttle for UAKEH
 from __future__ import print_function
-import serial
+import uakeh
 import tty
 import sys
 import os
@@ -16,37 +16,15 @@ usage_str = "Usage: {:s} <serial_dev>"
 bar_div = 2
 step = 0.5
 
-def open_ser(devname):
-    ser = serial.Serial(port = devname, baudrate = 115200)
-    return ser
-
-def read_ser():
-    c = 0
-    s = ""
-    while (True):
-        c = ser.read(1)
-        if (c == '\x0a'):
-            break
-        s = s + c
-
-    return s
-
-def write_ser(s):
-    ser.write(s + '\x0a')
-    while (True):
-        r = read_ser()
-        if (r == "OK!"):
-            break
-
-def init_uakeh(ser):
-    write_ser(gp_config_str)
-    write_ser(pwm_rc_str)
-    write_ser(pwm_enable_str)
+def init_uakeh():
+    uakeh.write_waitok(ser, gp_config_str)
+    uakeh.write_waitok(ser, pwm_rc_str)
+    uakeh.write_waitok(ser, pwm_enable_str)
 
 def update_throttle(t):
     global throttle
     if (throttle != t):
-        write_ser(pwm_throttle_str.format(t))
+        uakeh.write_waitok(ser, pwm_throttle_str.format(t))
     throttle = t
 
 def clear_screen():
@@ -83,13 +61,13 @@ if len(sys.argv) != 2:
     exit(-1)
 
 try:
-    ser = open_ser(sys.argv[1])
+    ser = uakeh.open(sys.argv[1])
 except:
     print("cannot open serial dev")
     exit(-2)
 
 tty.setraw(sys.stdin.fileno())
-init_uakeh(ser)
+init_uakeh()
 clear_screen()
 print("Use 'u' (up), 'd' (down), 'z' (zero), 'f' (full) keys, or q to quit")
 while(True):
@@ -97,5 +75,5 @@ while(True):
     if (t == None):
         break
     update_throttle(t)
-write_ser(pwm_disable_str)
+uakeh.write_waitok(ser, pwm_disable_str)
 os.system("reset")
