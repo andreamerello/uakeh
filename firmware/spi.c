@@ -167,7 +167,7 @@ cmd_res_t spi_cmd_xfer(char *str)
 	dma_enable_channel(DMA1, SPI_DMA_RX);
 	dma_enable_channel(DMA1, SPI_DMA_TX);
 
-	while(dma_get_interrupt_flag(DMA1, SPI_DMA_RX, DMA_TCIF));
+	while(!dma_get_interrupt_flag(DMA1, SPI_DMA_RX, DMA_TCIF));
 
 	dma_disable_channel(DMA1, SPI_DMA_TX);
 	dma_disable_channel(DMA1, SPI_DMA_RX);
