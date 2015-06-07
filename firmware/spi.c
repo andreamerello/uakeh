@@ -166,6 +166,7 @@ cmd_res_t spi_cmd_xfer(char *str)
 		str += idx;
 	}
 
+	dma_clear_interrupt_flags(DMA1, SPI_DMA_RX, DMA_TCIF);
 	dma_set_number_of_data(DMA1, SPI_DMA_TX, len);
 	dma_set_number_of_data(DMA1, SPI_DMA_RX, len);
 
