@@ -27,7 +27,7 @@
 #define SPI_CMD_PREFIX "SPI "
 #define SPI_DMA_TX DMA_CHANNEL3
 #define SPI_DMA_RX DMA_CHANNEL2
-#define SPI_DMA_PRIO 3
+#define SPI_DMA_PRIO DMA_CCR_PL_VERY_HIGH
 
 cmd_res_t spi_cmd_xfer(char *);
 cmd_res_t spi_cmd_cfg(char *);
