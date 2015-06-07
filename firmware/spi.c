@@ -214,8 +214,8 @@ void spi_init()
 	dma_enable_memory_increment_mode(DMA1, SPI_DMA_RX);
 	dma_disable_peripheral_increment_mode(DMA1, SPI_DMA_TX);
 	dma_disable_peripheral_increment_mode(DMA1, SPI_DMA_RX);
-	dma_set_peripheral_address(DMA1, SPI_DMA_TX, SPI1_DR);
-	dma_set_peripheral_address(DMA1, SPI_DMA_RX, SPI1_DR);
+	dma_set_peripheral_address(DMA1, SPI_DMA_TX, (uint32_t)&SPI1_DR);
+	dma_set_peripheral_address(DMA1, SPI_DMA_RX, (uint32_t)&SPI1_DR);
 	dma_set_read_from_memory(DMA1, SPI_DMA_TX);
 	dma_set_read_from_peripheral(DMA1, SPI_DMA_RX);
 	dma_set_priority(DMA1, SPI_DMA_RX, SPI_DMA_PRIO);
