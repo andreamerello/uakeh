@@ -39,3 +39,4 @@ FEATURES CURRENTLY IMPLEMENTED:
 - GPIO read/set
 - Analog IN read
 - PWM generation, including a dedicated mode for R/C devices (hobby ESC and servos).
+- SPI master
