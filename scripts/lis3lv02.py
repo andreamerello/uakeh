@@ -4,6 +4,8 @@ from __future__ import print_function
 import uakeh
 import sys
 import os
+import struct
+import time
 
 gp_config_str = ["gp setcfg a 4 af pp 10",
                  "gp setcfg a 5 af pp 10",
@@ -13,6 +15,10 @@ lis_start_cmd = "spi xfer 2 0x20 0xc7"
 lis_id_cmd = "spi xfer 2 0x8f 0x00"
 lis_read_cmd = "spi xfer 7 0xe8 0x00 0x00 0x00 0x00 0x00 0x00"
 lis_id = 0x3a
+
+max_history = 80
+scale = 10
+period = 0.005
 
 usage_str = "Usage: {:s} <serial_dev>"
 
@@ -31,19 +37,21 @@ def lis_start(ser):
     uakeh.write(ser, lis_start_cmd)
     uakeh.read(ser)
 
+def lis_2_py(sl, sh):
+    l = int(sl, 16)
+    h = int(sh, 16)
+    val = l | (h << 8)
+    return struct.unpack("h",struct.pack("H", val))[0]
+
 def lis_read(ser):
     uakeh.write(ser, lis_read_cmd)
     data = uakeh.read(ser)
     data_s = data.split(' ')
-    xl = int(data_s[1], 16)
-    xh = int(data_s[2], 16)
-    yl = int(data_s[3], 16)
-    yh = int(data_s[4], 16)
-    zl = int(data_s[5], 16)
-    zh = int(data_s[6], 16)
-    x = xl | (xh << 8)
-    y = yl | (yh << 8)
-    z = zl | (zh << 8)
+
+    x = lis_2_py(data_s[1], data_s[2])
+    y = lis_2_py(data_s[3], data_s[4])
+    z = lis_2_py(data_s[5], data_s[6])
+
     return (x, y, z)
 
 def clear_screen():
@@ -56,6 +64,14 @@ def print_loc(x,y,s):
        print("\033[" + str(y) +";" + str(x)+"H",end="")
     print(s,end="")
 
+def plot_trace(history, ybase):
+    for i, d in enumerate(history):
+        y = 1 + scale / 2 + d * scale / 4096
+        for j in range(0, scale + 1):
+            if (j == y):
+                continue
+            print_loc(i, j + ybase, " ")
+        print_loc(i, y + ybase, "*")
 
 if len(sys.argv) != 2:
     print (usage_str.format(sys.argv[0]))
@@ -74,8 +90,27 @@ if False == lis_probe(ser):
 
 lis_start(ser)
 clear_screen()
+
+history_x = []
+history_y = []
+history_z = []
+
 while(True):
     x, y, z = lis_read(ser)
     print_loc(1, 1, "X: {:05d}, Y: {:05d}, Z: {:05d}".format(x, y, z))
+
+    if (len(history_x) > max_history):
+        history_x.pop(0)
+        history_y.pop(0)
+        history_z.pop(0)
+
+    history_x.append(x)
+    history_y.append(y)
+    history_z.append(z)
+    plot_trace(history_x, 2 )
+    plot_trace(history_y, 4 + scale)
+    plot_trace(history_z, 8 + scale * 2)
+
+    time.sleep(period)
 
 os.system("reset")
