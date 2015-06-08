@@ -123,7 +123,6 @@ cmd_res_t spi_cmd_cfg(char *str)
 	else
 		spi_set_clock_phase_0(SPI1);
 
-	spi_enable(SPI1);
 	return CMD_OK;
 }
 
@@ -179,7 +178,10 @@ cmd_res_t spi_cmd_xfer(char *str)
 	spi_enable_rx_dma(SPI1);
 	spi_enable_tx_dma(SPI1);
 
+	/* enable/disable periph, otherwise NSS remains low :( */
+	spi_enable(SPI1);
 	while(!dma_get_interrupt_flag(DMA1, SPI_DMA_RX, DMA_TCIF));
+	spi_disable(SPI1);
 
 	dma_disable_channel(DMA1, SPI_DMA_TX);
 	dma_disable_channel(DMA1, SPI_DMA_RX);
