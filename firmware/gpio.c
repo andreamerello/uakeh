@@ -90,7 +90,6 @@ static gpio_arg32_t arg_port[] = {
 	{.str = "GPIOC", .val = GPIOC},
 };
 
-
 CMD_DECLARE_LIST(gpio_cmds) = {
 	{ .str = GP_CMD_PREFIX"SETCFG",
 	  .handler = gpio_cmd_set_cfg,
