@@ -67,7 +67,8 @@ void spi_set_dma_size(uint32_t size)
 
 cmd_res_t spi_cmd_cfg(char *str)
 {
-	unsigned int khz, endian, frame, ckpol, ckpha, presc;
+	unsigned int khz, frame, ckpol, ckpha, presc;
+	char endian;
 	int clock = rcc_apb2_frequency / 1000;
 
 	if (5 != sscanf(str, "%u %c %u %u %u",
