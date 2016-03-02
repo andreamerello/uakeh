@@ -4,41 +4,44 @@ import sys
 
 usage_str = "Usage: {:s} <serial_dev>"
 
-def open(devname):
-    ser = serial.Serial(port = devname, baudrate = 115200)
-    write_waitok(ser, "echo 0")
-    return ser
+class Uakeh:
+    def __init__(self, devname):
+        self.ser = serial.Serial(port = devname, baudrate = 115200)
+        self.write_waitok("echo 0")
 
-def read(ser):
-    c = 0
-    s = ""
-    while (True):
-        c = ser.read(1)
-        if (c == '\x0a'):
-            break
-        s = s + c
-    return s
+    def read(self):
+        c = 0
+        s = ""
+        while (True):
+            c = self.ser.read(1)
+            if (c == '\x0a'):
+                break
+            s = s + c
+        return s
 
-def write(ser, s):
-    ser.write(s + '\x0a')
+    def write(self, s):
+        self.ser.write(s + '\x0a')
 
-def write_waitok(ser, s):
-    write(ser, s)
-    while (True):
-        r = read(ser)
-        if (r == "OK!"):
-            break
+    def write_waitok(self, s):
+        self.write(s)
+        while (True):
+            r = self.read()
+            if (r == "OK!"):
+                break
+
+    def close(self):
+        self.ser.close()
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print (usage_str.format(sys.argv[0]))
         exit(-1)
     try:
-        ser = open(sys.argv[1])
-    except:
+        uakeh = Uakeh(sys.argv[1])
+    except IOError:
         print("cannot open serial dev")
         exit(-2)
 
-    write(ser, "FWV")
-    fwv = read(ser)
+    uakeh.write("FWV")
+    fwv = uakeh.read()
     print "UAKEH fw ver: " + fwv

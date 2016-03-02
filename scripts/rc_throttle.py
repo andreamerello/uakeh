@@ -17,14 +17,14 @@ bar_div = 2
 step = 0.5
 
 def init_uakeh():
-    uakeh.write_waitok(ser, gp_config_str)
-    uakeh.write_waitok(ser, pwm_rc_str)
-    uakeh.write_waitok(ser, pwm_enable_str)
+    uakeh.write_waitok(gp_config_str)
+    uakeh.write_waitok(pwm_rc_str)
+    uakeh.write_waitok(pwm_enable_str)
 
 def update_throttle(t):
     global throttle
     if (throttle != t):
-        uakeh.write_waitok(ser, pwm_throttle_str.format(t))
+        uakeh.write_waitok(pwm_throttle_str.format(t))
     throttle = t
 
 def clear_screen():
@@ -61,7 +61,7 @@ if len(sys.argv) != 2:
     exit(-1)
 
 try:
-    ser = uakeh.open(sys.argv[1])
+    uakeh = Uakeh(sys.argv[1])
 except:
     print("cannot open serial dev")
     exit(-2)
@@ -75,5 +75,5 @@ while(True):
     if (t == None):
         break
     update_throttle(t)
-uakeh.write_waitok(ser, pwm_disable_str)
+uakeh.write_waitok(pwm_disable_str)
 os.system("reset")

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #lis3lv02-SPI demo script (probe and 3-axis read)
 from __future__ import print_function
-import uakeh
+from uakeh import Uakeh
 import sys
 import os
 import struct
@@ -22,20 +22,20 @@ period = 0.005
 
 usage_str = "Usage: {:s} <serial_dev>"
 
-def init_uakeh(ser):
+def init_uakeh(uakeh):
     for s in gp_config_str:
-        uakeh.write_waitok(ser, s)
-    uakeh.write_waitok(ser, spi_cfg)
+        uakeh.write_waitok(s)
+    uakeh.write_waitok(spi_cfg)
 
-def lis_probe(ser):
-    uakeh.write(ser, lis_id_cmd)
-    resp = uakeh.read(ser)
+def lis_probe(uakeh):
+    uakeh.write(lis_id_cmd)
+    resp = uakeh.read()
     resp_id = resp.split(' ')[1]
     return (int(resp_id, 16) == lis_id)
 
-def lis_start(ser):
-    uakeh.write(ser, lis_start_cmd)
-    uakeh.read(ser)
+def lis_start(uakeh):
+    uakeh.write(lis_start_cmd)
+    uakeh.read()
 
 def lis_2_py(sl, sh):
     l = int(sl, 16)
@@ -43,9 +43,9 @@ def lis_2_py(sl, sh):
     val = l | (h << 8)
     return struct.unpack("h",struct.pack("H", val))[0]
 
-def lis_read(ser):
-    uakeh.write(ser, lis_read_cmd)
-    data = uakeh.read(ser)
+def lis_read(uakeh):
+    uakeh.write(lis_read_cmd)
+    data = uakeh.read()
     data_s = data.split(' ')
 
     x = lis_2_py(data_s[1], data_s[2])
@@ -78,17 +78,17 @@ if len(sys.argv) != 2:
     exit(-1)
 
 try:
-    ser = uakeh.open(sys.argv[1])
+    uakeh = Uakeh(sys.argv[1])
 except:
     print("cannot open serial dev")
     exit(-2)
 
-init_uakeh(ser)
-if False == lis_probe(ser):
+init_uakeh(uakeh)
+if False == lis_probe(uakeh):
     print("Lis3lv02 not detected!");
     exit(-3)
 
-lis_start(ser)
+lis_start(uakeh)
 clear_screen()
 
 history_x = []
@@ -96,7 +96,7 @@ history_y = []
 history_z = []
 
 while(True):
-    x, y, z = lis_read(ser)
+    x, y, z = lis_read(uakeh)
     print_loc(1, 1, "X: {:05d}, Y: {:05d}, Z: {:05d}".format(x, y, z))
 
     if (len(history_x) > max_history):

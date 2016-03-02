@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #AS5045 demo script (MOSI not connected!)
 from __future__ import print_function
-import uakeh
+from uakeh import Uakeh
 import sys
 import os
 import struct
@@ -17,10 +17,10 @@ period = 0.05
 
 usage_str = "Usage: {:s} <serial_dev>"
 
-def init_uakeh(ser):
+def init_uakeh(uakeh):
     for s in gp_config_str:
-        uakeh.write_waitok(ser, s)
-    uakeh.write_waitok(ser, spi_cfg)
+        uakeh.write_waitok(s)
+    uakeh.write_waitok(spi_cfg)
 
 def as_2_py(sh, sm, sl):
     l = int(sl, 16)
@@ -40,9 +40,9 @@ def as_2_py(sh, sm, sl):
     err = (val >> 1) & 0x1f
     return ang, err
 
-def as_read(ser):
-    uakeh.write(ser, as_read_cmd)
-    data = uakeh.read(ser)
+def as_read(uakeh):
+    uakeh.write(as_read_cmd)
+    data = uakeh.read()
     data_s = data.split(' ')
     ang = as_2_py(data_s[0], data_s[1], data_s[2])
 
@@ -59,17 +59,17 @@ def print_loc(x,y,s):
     print(s,end="")
 
 try:
-    ser = uakeh.open(sys.argv[1])
+    uakeh = Uakeh(sys.argv[1])
 except:
     print("cannot open serial dev")
     exit(-2)
 
-init_uakeh(ser)
+init_uakeh(uakeh)
 clear_screen()
 
 par_err = 0
 while(True):
-    ang, err = as_read(ser)
+    ang, err = as_read(uakeh)
     if (ang == -1):
         par_err = par_err + 1
     print_loc(1, 1, "ang: {:05d} err:{:x}".format(ang, err))
